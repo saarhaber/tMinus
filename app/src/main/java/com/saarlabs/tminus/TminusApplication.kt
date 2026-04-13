@@ -5,6 +5,7 @@ import com.mbta.tid.mbta_app.model.response.ApiResult
 import com.mbta.tid.mbta_app.model.response.GlobalData
 import com.mbta.tid.mbta_app.network.MbtaV3Client
 import com.mbta.tid.mbta_app.usecases.WidgetTripUseCase
+import com.saarlabs.tminus.commute.CommuteRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -14,6 +15,7 @@ public class TminusApplication : Application() {
         super.onCreate()
         instance = this
         refreshNetworking()
+        CommuteRepository.ensureWorkerScheduled(this)
     }
 
     public companion object {

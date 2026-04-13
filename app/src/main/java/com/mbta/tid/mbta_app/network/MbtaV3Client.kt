@@ -218,84 +218,98 @@ public class MbtaV3Client(private val apiKey: String?) {
     public suspend fun fetchScheduleForStops(
         stopIds: List<String>,
         now: EasternTimeInstant,
+    ): ApiResult<ScheduleResponse> {
+        val minTime =
+            "${now.local.hour.toString().padStart(2, '0')}:${now.local.minute.toString().padStart(2, '0')}"
+        return fetchScheduleForStopsInWindow(stopIds, minTime, "23:59")
+    }
+
+    /**
+     * Schedules at [fromStopIds] with departure times between [minTime] and [maxTime] (HH:mm, Eastern).
+     */
+    public suspend fun fetchScheduleForStopsInWindow(
+        stopIds: List<String>,
+        minTime: String,
+        maxTime: String,
     ): ApiResult<ScheduleResponse> =
         withContext(Dispatchers.IO) {
             try {
-                val minTime =
-                    "${now.local.hour.toString().padStart(2, '0')}:${now.local.minute.toString().padStart(2, '0')}"
                 val doc =
                     httpClient
                         .get("schedules") {
                             parameter("filter[stop]", stopIds.joinToString(","))
                             parameter("filter[min_time]", minTime)
-                            parameter("filter[max_time]", "23:59")
+                            parameter("filter[max_time]", maxTime)
                             parameter("include", "trip,route")
                             parameter("page[limit]", "500")
                         }
                         .body<JsonObject>()
-
-                val schedules = mutableListOf<com.mbta.tid.mbta_app.model.Schedule>()
-                val trips = mutableMapOf<String, Trip>()
-
-                for (el in doc["data"]?.jsonArray.orEmpty()) {
-                    val sObj = el.jsonObject
-                    val id = sObj["id"]?.jsonPrimitive?.content ?: continue
-                    val attrs = sObj["attributes"]?.jsonObject ?: continue
-                    val tripId =
-                        sObj["relationships"]
-                            ?.jsonObject
-                            ?.get("trip")
-                            ?.jsonObject
-                            ?.get("data")
-                            ?.jsonObject
-                            ?.get("id")
-                            ?.jsonPrimitive
-                            ?.content ?: continue
-
-                    val depStr =
-                        attrs["departure_time"]?.jsonPrimitive?.content
-                            ?: attrs["arrival_time"]?.jsonPrimitive?.content
-                    val arrStr =
-                        attrs["arrival_time"]?.jsonPrimitive?.content
-                            ?: attrs["departure_time"]?.jsonPrimitive?.content
-                    val dep = depStr?.let { EasternTimeInstant(Instant.parse(it)) }
-                    val arr = arrStr?.let { EasternTimeInstant(Instant.parse(it)) }
-                    val stopId =
-                        sObj["relationships"]
-                            ?.jsonObject
-                            ?.get("stop")
-                            ?.jsonObject
-                            ?.get("data")
-                            ?.jsonObject
-                            ?.get("id")
-                            ?.jsonPrimitive
-                            ?.content ?: continue
-                    val seq = attrs["stop_sequence"]?.jsonPrimitive?.intOrNull ?: continue
-                    val headsign = attrs["stop_headsign"]?.jsonPrimitive?.content
-
-                    schedules.add(
-                        com.mbta.tid.mbta_app.model.Schedule(
-                            id = id,
-                            arrivalTime = arr,
-                            departureTime = dep,
-                            stopHeadsign = headsign,
-                            stopSequence = seq,
-                            stopId = stopId,
-                            tripId = tripId,
-                        ),
-                    )
-
-                    val tripIncluded = findIncluded(doc, "trip", tripId)
-                    if (tripIncluded != null && !trips.containsKey(tripId)) {
-                        parseTrip(tripIncluded)?.let { trips[tripId] = it }
-                    }
-                }
-
-                ApiResult.Ok(ScheduleResponse(schedules = schedules, trips = trips))
+                parseScheduleDocument(doc)
             } catch (e: Throwable) {
                 ApiResult.Error(message = e.message ?: e.toString())
             }
         }
+
+    private fun parseScheduleDocument(doc: JsonObject): ApiResult<ScheduleResponse> {
+        val schedules = mutableListOf<com.mbta.tid.mbta_app.model.Schedule>()
+        val trips = mutableMapOf<String, Trip>()
+
+        for (el in doc["data"]?.jsonArray.orEmpty()) {
+            val sObj = el.jsonObject
+            val id = sObj["id"]?.jsonPrimitive?.content ?: continue
+            val attrs = sObj["attributes"]?.jsonObject ?: continue
+            val tripId =
+                sObj["relationships"]
+                    ?.jsonObject
+                    ?.get("trip")
+                    ?.jsonObject
+                    ?.get("data")
+                    ?.jsonObject
+                    ?.get("id")
+                    ?.jsonPrimitive
+                    ?.content ?: continue
+
+            val depStr =
+                attrs["departure_time"]?.jsonPrimitive?.content
+                    ?: attrs["arrival_time"]?.jsonPrimitive?.content
+            val arrStr =
+                attrs["arrival_time"]?.jsonPrimitive?.content
+                    ?: attrs["departure_time"]?.jsonPrimitive?.content
+            val dep = depStr?.let { EasternTimeInstant(Instant.parse(it)) }
+            val arr = arrStr?.let { EasternTimeInstant(Instant.parse(it)) }
+            val stopId =
+                sObj["relationships"]
+                    ?.jsonObject
+                    ?.get("stop")
+                    ?.jsonObject
+                    ?.get("data")
+                    ?.jsonObject
+                    ?.get("id")
+                    ?.jsonPrimitive
+                    ?.content ?: continue
+            val seq = attrs["stop_sequence"]?.jsonPrimitive?.intOrNull ?: continue
+            val headsign = attrs["stop_headsign"]?.jsonPrimitive?.content
+
+            schedules.add(
+                com.mbta.tid.mbta_app.model.Schedule(
+                    id = id,
+                    arrivalTime = arr,
+                    departureTime = dep,
+                    stopHeadsign = headsign,
+                    stopSequence = seq,
+                    stopId = stopId,
+                    tripId = tripId,
+                ),
+            )
+
+            val tripIncluded = findIncluded(doc, "trip", tripId)
+            if (tripIncluded != null && !trips.containsKey(tripId)) {
+                parseTrip(tripIncluded)?.let { trips[tripId] = it }
+            }
+        }
+
+        return ApiResult.Ok(ScheduleResponse(schedules = schedules, trips = trips))
+    }
 
     private suspend inline fun paginateJsonApi(
         path: String,

@@ -4,6 +4,8 @@ Open-source Android widgets and tools for MBTA riders. Application ID: **`com.sa
 
 The in-app UI uses bottom navigation: **Home**, **Roadmap** (current and possible future features), and **Settings** (API keys and documentation links).
 
+**Commutes** (from Home): save **multiple** named routes (from/to stops), **days of week**, a **target time**, and a **window** (minutes before/after) used to query schedules. Set **notify X minutes before departure** for a “time to leave” notification, and optionally a second ping around **scheduled arrival**. Checks run on a background schedule (about every 15 minutes) using **schedule data** from the MBTA V3 API—not live predictions. Grant **notification permission** on Android 13+ when prompted.
+
 ## API keys (optional but recommended)
 
 The app works without keys for light use. For higher rate limits, request a free key from the V3 portal and paste it in **Settings** inside the app.
