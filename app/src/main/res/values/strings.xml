@@ -3,6 +3,29 @@
     <string name="app_name">Tminus</string>
     <string name="loading">Loading…</string>
 
+    <string name="nav_home">Home</string>
+    <string name="nav_roadmap">Roadmap</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="home_title">Tminus</string>
+    <string name="home_body">Add the MBTA Trip widget from your home screen, then pick from and to stops. Use Settings for API keys if you need higher rate limits.</string>
+    <string name="home_hint_tabs">Use the bar below for roadmap ideas and settings—more features will land here over time.</string>
+
+    <string name="roadmap_intro">Current capabilities and ideas for the future. Nothing here is a promise; it is a living list as the project grows.</string>
+    <string name="roadmap_section_in_app">In the app today</string>
+    <string name="roadmap_feature_trip_widget">Home screen trip widget (next trip between two stops)</string>
+    <string name="roadmap_feature_api_keys">Optional MBTA V3 and GTFS Realtime key fields</string>
+    <string name="roadmap_feature_roadmap_screen">This roadmap screen</string>
+    <string name="roadmap_section_planned">Planned or under consideration</string>
+    <string name="roadmap_feature_notifications">Departure reminders and “train leaving soon” notifications</string>
+    <string name="roadmap_feature_alerts">Service alerts and elevator outages near your trip</string>
+    <string name="roadmap_feature_predictions">Live predictions in the widget (not only schedules)</string>
+    <string name="roadmap_feature_favorites">Saved stops and commute presets</string>
+    <string name="roadmap_feature_more_widgets">More home screen widgets (arrivals board, line status)</string>
+    <string name="roadmap_section_community">Community</string>
+    <string name="roadmap_feature_contributing">Contributions welcome—see CONTRIBUTING.md on GitHub</string>
+    <string name="roadmap_footer">Have an idea? Open an issue or PR on the Tminus repository.</string>
+
     <string name="widget_trip_description">Next trip from one stop to another</string>
     <string name="widget_configure_title">Configure Trip Widget</string>
     <string name="widget_from">From</string>
