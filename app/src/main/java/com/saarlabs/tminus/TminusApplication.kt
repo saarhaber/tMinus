@@ -1,4 +1,4 @@
-package com.saarhaber.tminus
+package com.saarlabs.tminus
 
 import android.app.Application
 import com.mbta.tid.mbta_app.model.response.ApiResult

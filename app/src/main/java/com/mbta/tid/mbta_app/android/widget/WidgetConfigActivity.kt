@@ -59,8 +59,8 @@ import com.mbta.tid.mbta_app.model.Stop
 import com.mbta.tid.mbta_app.model.WidgetTripConfig
 import com.mbta.tid.mbta_app.model.response.ApiResult
 import com.mbta.tid.mbta_app.model.response.GlobalData
-import com.saarhaber.tminus.GlobalDataStore
-import com.saarhaber.tminus.R
+import com.saarlabs.tminus.GlobalDataStore
+import com.saarlabs.tminus.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.saarhaber.tminus
+package com.saarlabs.tminus
 
 import android.content.Intent
 import android.os.Bundle

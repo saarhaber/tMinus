@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.saarhaber.tminus"
+    namespace = "com.saarlabs.tminus"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.saarhaber.tminus"
+        applicationId = "com.saarlabs.tminus"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1

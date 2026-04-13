@@ -1,4 +1,4 @@
-package com.saarhaber.tminus
+package com.saarlabs.tminus
 
 internal object SettingsKeys {
     const val PREFS = "tminus_settings"
