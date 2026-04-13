@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="key">#FF1C1C1E</color>
+    <color name="deemphasized">#FF8E8E93</color>
+    <color name="text">#FF1C1C1E</color>
+    <color name="fill2">#FFF2F2F7</color>
+    <color name="fill3">#FFE5E5EA</color>
+</resources>
