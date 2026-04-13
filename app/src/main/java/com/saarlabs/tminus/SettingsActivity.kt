@@ -25,7 +25,7 @@ public class SettingsActivity : ComponentActivity() {
                             prefs.edit()
                                 .putString(SettingsKeys.KEY_V3_API, v3.ifBlank { null })
                                 .putString(SettingsKeys.KEY_GTFS_RT, gtfs.ifBlank { null })
-                                .apply()
+                                .commit()
                             GlobalDataStore.invalidate()
                             TminusApplication.refreshNetworking()
                             finish()
