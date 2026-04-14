@@ -8,9 +8,11 @@ on:
 permissions:
   contents: write
 
+# Queue runs so a fast follow-up merge cannot cancel a job after the tag moved
+# but before the APK finished uploading (which leaves an empty release).
 concurrency:
   group: publish-apk-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish-apk:
@@ -33,14 +35,9 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Point rolling tag at this commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -f latest-main "${{ github.sha }}"
-          git push origin "refs/tags/latest-main" --force
-
-      - name: Upload APK to rolling prerelease
+      # Single step: create/move tag, release, and upload assets (avoids empty releases
+      # if a concurrent run was cancelled between `git push tag` and upload).
+      - name: Publish rolling prerelease with APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-main
@@ -52,4 +49,5 @@ jobs:
           prerelease: true
           make_latest: "false"
           target_commitish: ${{ github.sha }}
+          fail_on_unmatched_files: true
           files: app/build/outputs/apk/debug/app-debug.apk
