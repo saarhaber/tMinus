@@ -34,12 +34,14 @@ public fun StopSearchPicker(
     modifier: Modifier = Modifier,
 ) {
     var global by remember { mutableStateOf<GlobalData?>(null) }
+    var loadError by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
+        loadError = null
         when (val r = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }) {
             is ApiResult.Ok -> global = r.data
-            is ApiResult.Error -> {}
+            is ApiResult.Error -> loadError = r.message
         }
     }
 
@@ -52,7 +54,22 @@ public fun StopSearchPicker(
         }
 
     if (global == null) {
-        CircularProgressIndicator(modifier = modifier.padding(24.dp))
+        if (loadError != null) {
+            Column(modifier = modifier.padding(24.dp)) {
+                Text(
+                    stringResource(R.string.widget_loading_timeout_tminus),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    loadError!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        } else {
+            CircularProgressIndicator(modifier = modifier.padding(24.dp))
+        }
         return
     }
 

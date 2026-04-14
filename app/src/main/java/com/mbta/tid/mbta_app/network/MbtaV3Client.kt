@@ -66,9 +66,9 @@ public class MbtaV3Client(private val apiKey: String?) {
                 val stops = linkedMapOf<String, Stop>()
                 paginateJsonApi(
                     path = "stops",
+                    pageLimit = 500,
                     configure = {
                         parameter("filter[location_type]", "0,1")
-                        parameter("page[limit]", "500")
                     },
                 ) { doc ->
                     mergeIncludedStops(doc, stops)
@@ -83,7 +83,8 @@ public class MbtaV3Client(private val apiKey: String?) {
                 val routes = linkedMapOf<String, Route>()
                 paginateJsonApi(
                     path = "routes",
-                    configure = { parameter("page[limit]", "100") },
+                    pageLimit = 100,
+                    configure = {},
                 ) { doc ->
                     for (el in doc["data"]?.jsonArray.orEmpty()) {
                         val o = el.jsonObject
@@ -112,9 +113,9 @@ public class MbtaV3Client(private val apiKey: String?) {
                 val reachable = mutableSetOf<String>()
                 paginateJsonApi(
                     path = "route_patterns",
+                    pageLimit = 50,
                     configure = {
                         parameter("filter[stop]", fromStopId)
-                        parameter("page[limit]", "50")
                     },
                 ) { doc ->
                     for (el in doc["data"]?.jsonArray.orEmpty()) {
@@ -321,9 +322,9 @@ public class MbtaV3Client(private val apiKey: String?) {
                 val out = mutableListOf<com.mbta.tid.mbta_app.model.response.MbtaAlertSummary>()
                 paginateJsonApi(
                     path = "alerts",
+                    pageLimit = 50,
                     configure = {
                         parameter("filter[route]", routeId)
-                        parameter("page[limit]", "50")
                     },
                 ) { doc ->
                     for (el in doc["data"]?.jsonArray.orEmpty()) {
@@ -426,26 +427,30 @@ public class MbtaV3Client(private val apiKey: String?) {
             }
         }
 
+    /**
+     * Paginates with `page[offset]` and `page[limit]` on each request. We do not follow `links.next`
+     * because those URLs contain unescaped `[` / `]` in query names, which breaks URL parsing on
+     * Android/Ktor and caused incomplete stop/route loads (empty search after a failed fetch).
+     */
     private suspend inline fun paginateJsonApi(
         path: String,
+        pageLimit: Int,
         crossinline configure: HttpRequestBuilder.() -> Unit = {},
         crossinline eachPage: suspend (JsonObject) -> Unit,
     ) {
-        var next: String? = null
-        var isFirst = true
+        var offset = 0
         var guard = 0
-        while (isFirst || next != null) {
-            if (guard++ > 500) break
+        while (guard++ < 500) {
             val doc =
-                if (isFirst) {
-                    isFirst = false
-                    httpClient.get(path, configure).body<JsonObject>()
-                } else {
-                    val u = next ?: break
-                    httpClient.get { url(u) }.body<JsonObject>()
-                }
+                httpClient.get(path) {
+                    configure()
+                    parameter("page[limit]", pageLimit.toString())
+                    parameter("page[offset]", offset.toString())
+                }.body<JsonObject>()
             eachPage(doc)
-            next = doc["links"]?.jsonObject?.get("next")?.jsonPrimitive?.content
+            val count = doc["data"]?.jsonArray?.size ?: 0
+            if (count < pageLimit) break
+            offset += pageLimit
         }
     }
 
