@@ -1,6 +1,6 @@
-# Contributing to Tminus
+# Contributing to tMinus
 
-Thanks for helping improve Tminus. This project welcomes contributions from the community.
+Thanks for helping improve tMinus. This project welcomes contributions from the community.
 
 ## Ways to contribute
 

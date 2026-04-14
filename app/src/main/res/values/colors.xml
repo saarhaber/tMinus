@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Adaptive launcher icon background (matches prior in-app triangle brand color) -->
-    <color name="ic_launcher_background">#ED8B00</color>
+    <!-- Adaptive launcher icon background (matches 1024×1024 brand PNG canvas) -->
+    <color name="ic_launcher_background">#0B1426</color>
     <color name="key">#FF1C1C1E</color>
     <color name="deemphasized">#FF8E8E93</color>
     <color name="text">#FF1C1C1E</color>

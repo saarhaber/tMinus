@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tminus</string>
+    <string name="app_name">tMinus</string>
     <string name="loading">Loading…</string>
 
     <string name="nav_home">Home</string>
     <string name="nav_roadmap">Roadmap</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="home_title">Tminus</string>
+    <string name="home_title">tMinus</string>
     <string name="home_body">Add the MBTA Trip widget from your home screen, then pick from and to stops. Set up daily commutes for leave-time and arrival notifications. Everything works without an API key; open Settings to add one only if you hit rate limits.</string>
     <string name="home_commutes_button">Commutes &amp; notifications</string>
     <string name="home_last_train_button">Last / first train alerts</string>
@@ -113,7 +113,7 @@
     <string name="roadmap_feature_api_keys">Optional MBTA V3 API key field</string>
 
     <string name="settings_api_keys_title">API key</string>
-    <string name="settings_api_keys_body">Tminus uses the MBTA V3 API for schedules, stops, and alerts. The home screen widget, commutes and notifications, last/first train alerts, and accessibility watches all work without a key. Add a free key from the portal below if you see rate-limit errors (HTTP 429) or repeated load failures—higher limits are the only reason to save one.</string>
+    <string name="settings_api_keys_body">tMinus uses the MBTA V3 API for schedules, stops, and alerts. The home screen widget, commutes and notifications, last/first train alerts, and accessibility watches all work without a key. Add a free key from the portal below if you see rate-limit errors (HTTP 429) or repeated load failures—higher limits are the only reason to save one.</string>
     <string name="settings_link_v3_portal">V3 API portal — request a free key</string>
     <string name="settings_link_v3_swagger">V3 API reference (Swagger)</string>
     <string name="settings_v3_key_label">MBTA V3 API key (optional — for rate limits)</string>
@@ -141,7 +141,7 @@
     <string name="roadmap_feature_more_widgets">More home screen widgets (arrivals board, line status)</string>
     <string name="roadmap_section_community">Community</string>
     <string name="roadmap_feature_contributing">Contributions welcome—see CONTRIBUTING.md on GitHub</string>
-    <string name="roadmap_footer">Have an idea? Open an issue or PR on the Tminus repository.</string>
+    <string name="roadmap_footer">Have an idea? Open an issue or PR on the tMinus repository.</string>
     <string name="roadmap_report_issue">Report a bug or suggest a feature</string>
 
     <string name="widget_trip_description">Next trip from one stop to another</string>
@@ -158,13 +158,13 @@
     <string name="widget_loading_destinations">Loading destinations…</string>
     <string name="widget_clear_stop">Clear</string>
     <string name="widget_save_error">Failed to save. Please try again.</string>
-    <string name="widget_loading_timeout_tminus">Unable to load stops. Check your connection or add a V3 API key in Tminus settings, then try again.</string>
+    <string name="widget_loading_timeout_tminus">Unable to load stops. Check your connection or add a V3 API key in tMinus settings, then try again.</string>
     <string name="widget_select_different_stops">Choose a different destination.</string>
     <string name="widget_destinations_unavailable">Could not load destinations for this stop (%1$s). Check your connection or add a V3 API key in Settings, then try again.</string>
     <string name="widget_configure">Tap to configure</string>
     <string name="widget_set_from_to">Set your from and to stops</string>
     <string name="widget_unable_to_load">Unable to load</string>
-    <string name="widget_trip_times_error">Trip times unavailable. Open Tminus or check your connection.</string>
+    <string name="widget_trip_times_error">Trip times unavailable. Open tMinus or check your connection.</string>
     <string name="widget_no_trips">No trips available</string>
     <string name="widget_in_minutes">in %1$d min</string>
     <string name="widget_track_short">Track %1$s</string>
