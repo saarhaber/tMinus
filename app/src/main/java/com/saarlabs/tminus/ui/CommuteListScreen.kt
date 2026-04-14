@@ -113,9 +113,9 @@ public fun CommuteListScreen(
             Column(
                 modifier =
                     Modifier.padding(padding)
-                        .padding(24.dp)
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
                         .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
             ) {
                 Text(
                     stringResource(R.string.commute_list_empty),

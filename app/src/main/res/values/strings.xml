@@ -171,4 +171,20 @@
     <string name="widget_in_minutes">in %1$d min</string>
     <string name="widget_track_short">Track %1$s</string>
     <string name="widget_train">Train %1$s</string>
+
+    <string name="widget_station_board_description">Scheduled departures at a stop</string>
+    <string name="widget_station_board_configure_title">Configure station board</string>
+    <string name="widget_station_board_scheduled_subtitle">Scheduled departures</string>
+    <string name="widget_station_board_configure_hint">Choose a stop and optional line</string>
+    <string name="widget_station_board_no_departures">No upcoming departures</string>
+    <string name="widget_station_board_times_error">Departures unavailable. Open tMinus or check your connection.</string>
+    <string name="widget_preview_station_board_station">Park Street</string>
+    <string name="widget_preview_station_board_line1">Red · Alewife · 3 min</string>
+    <string name="widget_preview_station_board_line2">Green · Heath St · 6 min</string>
+    <string name="widget_station_board_select_stop_placeholder">Search stops</string>
+    <string name="widget_station_board_selecting_stop">Station</string>
+    <string name="widget_station_board_route_section">Line filter</string>
+    <string name="widget_station_board_route_all">All lines</string>
+    <string name="widget_station_board_loading_routes">Loading lines…</string>
+    <string name="widget_station_board_save">Add widget</string>
 </resources>
