@@ -341,6 +341,8 @@ public fun CommuteEditorScreen(
                 validationMessage = issues.joinToString("\n")
                 return@RowHorizontalButtons
             }
+            val from = requireNotNull(f)
+            val to = requireNotNull(t)
             val hour = hourStr.toIntOrNull()?.coerceIn(0, 23) ?: 8
             val minute = minStr.toIntOrNull()?.coerceIn(0, 59) ?: 0
             val targetMinutes = hour * 60 + minute
@@ -348,10 +350,10 @@ public fun CommuteEditorScreen(
                 CommuteProfile(
                     id = initial?.id ?: java.util.UUID.randomUUID().toString(),
                     name = name.trim(),
-                    fromStopId = f.id,
-                    toStopId = t.id,
-                    fromLabel = f.name,
-                    toLabel = t.name,
+                    fromStopId = from.id,
+                    toStopId = to.id,
+                    fromLabel = from.name,
+                    toLabel = to.name,
                     daysOfWeek = days.sorted(),
                     targetMinutesFromMidnight = targetMinutes,
                     windowMinutesBefore = winBefore.toIntOrNull()?.coerceIn(5, 180) ?: 45,

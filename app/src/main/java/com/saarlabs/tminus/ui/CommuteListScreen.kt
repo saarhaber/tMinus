@@ -59,7 +59,8 @@ public fun CommuteListScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
-    val repo = remember { CommuteRepository(LocalContext.current) }
+    val context = LocalContext.current
+    val repo = remember(context) { CommuteRepository(context) }
     var profiles by remember { mutableStateOf<List<CommuteProfile>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
