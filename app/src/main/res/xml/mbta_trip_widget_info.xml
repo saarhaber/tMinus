@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="com.mbta.tid.mbta_app.android.widget.WidgetConfigActivity"
+    android:configure="com.saarlabs.tminus.android.widget.WidgetConfigActivity"
     android:description="@string/widget_trip_description"
     android:initialLayout="@layout/widget_trip_loading"
     android:minWidth="180dp"

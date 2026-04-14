@@ -1,6 +1,6 @@
-package com.mbta.tid.mbta_app.model
+package com.saarlabs.tminus.model
 
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.util.EasternTimeInstant
 
 public data class WidgetTripData(
     val fromStop: Stop,

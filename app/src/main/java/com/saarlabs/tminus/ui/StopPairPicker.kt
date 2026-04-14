@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.model.response.GlobalData
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import kotlinx.coroutines.Dispatchers

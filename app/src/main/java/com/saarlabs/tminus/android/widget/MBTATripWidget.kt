@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.android.widget
+package com.saarlabs.tminus.android.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -29,10 +29,10 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.mbta.tid.mbta_app.model.WidgetTripConfig
-import com.mbta.tid.mbta_app.model.WidgetTripData
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.usecases.WidgetTripUseCase
+import com.saarlabs.tminus.model.WidgetTripConfig
+import com.saarlabs.tminus.model.WidgetTripData
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.usecases.WidgetTripUseCase
 import com.saarlabs.tminus.MainActivity
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.TminusApplication

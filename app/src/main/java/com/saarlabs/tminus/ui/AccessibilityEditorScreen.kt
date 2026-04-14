@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.response.ApiResult
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.features.AccessibilityWatch

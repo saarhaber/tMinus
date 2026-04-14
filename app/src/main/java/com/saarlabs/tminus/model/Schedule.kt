@@ -1,6 +1,6 @@
-package com.mbta.tid.mbta_app.model
+package com.saarlabs.tminus.model
 
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.util.EasternTimeInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

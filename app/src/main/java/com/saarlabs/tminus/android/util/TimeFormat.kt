@@ -1,6 +1,6 @@
 package com.saarlabs.tminus.android.util
 
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.util.EasternTimeInstant
 
 internal fun EasternTimeInstant.formattedTime(): String {
     val h = local.hour

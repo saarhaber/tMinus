@@ -1,10 +1,10 @@
 package com.saarlabs.tminus
 
 import android.app.Application
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.model.response.GlobalData
-import com.mbta.tid.mbta_app.network.MbtaV3Client
-import com.mbta.tid.mbta_app.usecases.WidgetTripUseCase
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
+import com.saarlabs.tminus.network.MbtaV3Client
+import com.saarlabs.tminus.usecases.WidgetTripUseCase
 import com.saarlabs.tminus.commute.CommuteRepository
 import com.saarlabs.tminus.features.LastTrainRepository
 import kotlinx.coroutines.sync.Mutex

@@ -29,7 +29,7 @@
             android:theme="@style/Theme.Tminus" />
 
         <activity
-            android:name="com.mbta.tid.mbta_app.android.widget.WidgetConfigActivity"
+            android:name="com.saarlabs.tminus.android.widget.WidgetConfigActivity"
             android:exported="true"
             android:theme="@style/Theme.Tminus">
             <intent-filter>
@@ -38,7 +38,7 @@
         </activity>
 
         <receiver
-            android:name="com.mbta.tid.mbta_app.android.widget.MBTATripWidgetReceiver"
+            android:name="com.saarlabs.tminus.android.widget.MBTATripWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_trip_description">
             <intent-filter>
@@ -46,7 +46,7 @@
             </intent-filter>
             <meta-data
                 android:name="androidx.glance.appwidget.GlanceAppWidget"
-                android:value="com.mbta.tid.mbta_app.android.widget.MBTATripWidget" />
+                android:value="com.saarlabs.tminus.android.widget.MBTATripWidget" />
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/mbta_trip_widget_info" />

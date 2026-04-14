@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.utils
+package com.saarlabs.tminus.util
 
 import kotlin.time.Duration
 import kotlinx.datetime.Clock
@@ -68,7 +68,7 @@ private constructor(internal val instant: Instant, public val local: LocalDateTi
     internal object Serializer : KSerializer<EasternTimeInstant> {
         override val descriptor =
             PrimitiveSerialDescriptor(
-                "com.mbta.tid.mbta_app.utils.EasternTimeInstant",
+                "com.saarlabs.tminus.util.EasternTimeInstant",
                 PrimitiveKind.STRING,
             )
 

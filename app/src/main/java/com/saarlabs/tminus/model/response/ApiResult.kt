@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.model.response
+package com.saarlabs.tminus.model.response
 
 public sealed class ApiResult<out T : Any> {
     public data class Ok<T : Any>(val data: T) : ApiResult<T>()

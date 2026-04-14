@@ -1,3 +1,3 @@
-package com.mbta.tid.mbta_app.model
+package com.saarlabs.tminus.model
 
 public data class WidgetTripOutput(val trip: WidgetTripData?)

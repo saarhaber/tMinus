@@ -1,8 +1,8 @@
-package com.mbta.tid.mbta_app.android.widget
+package com.saarlabs.tminus.android.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
-import com.mbta.tid.mbta_app.model.WidgetTripConfig
+import com.saarlabs.tminus.model.WidgetTripConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

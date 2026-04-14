@@ -10,8 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.util.EasternTimeInstant
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.MainActivity
 import com.saarlabs.tminus.R

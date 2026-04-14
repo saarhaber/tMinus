@@ -1,14 +1,14 @@
-package com.mbta.tid.mbta_app.usecases
+package com.saarlabs.tminus.usecases
 
-import com.mbta.tid.mbta_app.model.RouteType
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.WidgetTripData
-import com.mbta.tid.mbta_app.model.WidgetTripOutput
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.model.response.GlobalData
-import com.mbta.tid.mbta_app.model.response.ScheduleResponse
-import com.mbta.tid.mbta_app.network.MbtaV3Client
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.model.RouteType
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.WidgetTripData
+import com.saarlabs.tminus.model.WidgetTripOutput
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
+import com.saarlabs.tminus.model.response.ScheduleResponse
+import com.saarlabs.tminus.network.MbtaV3Client
+import com.saarlabs.tminus.util.EasternTimeInstant
 
 /**
  * Next trip between two stops (ported from [mbta/mobile_app#1593](https://github.com/mbta/mobile_app/pull/1593)),

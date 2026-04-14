@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.android.widget
+package com.saarlabs.tminus.android.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName

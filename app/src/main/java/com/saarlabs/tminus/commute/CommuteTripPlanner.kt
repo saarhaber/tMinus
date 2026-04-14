@@ -1,11 +1,11 @@
 package com.saarlabs.tminus.commute
 
-import com.mbta.tid.mbta_app.model.RouteType
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.WidgetTripData
-import com.mbta.tid.mbta_app.model.response.GlobalData
-import com.mbta.tid.mbta_app.model.response.ScheduleResponse
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.model.RouteType
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.WidgetTripData
+import com.saarlabs.tminus.model.response.GlobalData
+import com.saarlabs.tminus.model.response.ScheduleResponse
+import com.saarlabs.tminus.util.EasternTimeInstant
 
 /**
  * Finds the next trip between two stops whose departure falls in

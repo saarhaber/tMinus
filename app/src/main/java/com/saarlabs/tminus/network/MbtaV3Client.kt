@@ -1,15 +1,15 @@
-package com.mbta.tid.mbta_app.network
+package com.saarlabs.tminus.network
 
-import com.mbta.tid.mbta_app.model.LocationType
-import com.mbta.tid.mbta_app.model.Route
-import com.mbta.tid.mbta_app.model.RouteType
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.Trip
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.model.response.DepartureLookupResult
-import com.mbta.tid.mbta_app.model.response.GlobalData
-import com.mbta.tid.mbta_app.model.response.ScheduleResponse
-import com.mbta.tid.mbta_app.utils.EasternTimeInstant
+import com.saarlabs.tminus.model.LocationType
+import com.saarlabs.tminus.model.Route
+import com.saarlabs.tminus.model.RouteType
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.Trip
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.DepartureLookupResult
+import com.saarlabs.tminus.model.response.GlobalData
+import com.saarlabs.tminus.model.response.ScheduleResponse
+import com.saarlabs.tminus.util.EasternTimeInstant
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -253,7 +253,7 @@ public class MbtaV3Client(private val apiKey: String?) {
         }
 
     private fun parseScheduleDocument(doc: JsonObject): ApiResult<ScheduleResponse> {
-        val schedules = mutableListOf<com.mbta.tid.mbta_app.model.Schedule>()
+        val schedules = mutableListOf<com.saarlabs.tminus.model.Schedule>()
         val trips = mutableMapOf<String, Trip>()
 
         for (el in doc["data"]?.jsonArray.orEmpty()) {
@@ -293,7 +293,7 @@ public class MbtaV3Client(private val apiKey: String?) {
             val headsign = attrs["stop_headsign"]?.jsonPrimitive?.content
 
             schedules.add(
-                com.mbta.tid.mbta_app.model.Schedule(
+                com.saarlabs.tminus.model.Schedule(
                     id = id,
                     arrivalTime = arr,
                     departureTime = dep,
@@ -316,10 +316,10 @@ public class MbtaV3Client(private val apiKey: String?) {
     /**
      * Active alerts for a route (paginated). Used for elevator / accessibility watches.
      */
-    public suspend fun fetchAlertsForRoute(routeId: String): ApiResult<List<com.mbta.tid.mbta_app.model.response.MbtaAlertSummary>> =
+    public suspend fun fetchAlertsForRoute(routeId: String): ApiResult<List<com.saarlabs.tminus.model.response.MbtaAlertSummary>> =
         withContext(Dispatchers.IO) {
             try {
-                val out = mutableListOf<com.mbta.tid.mbta_app.model.response.MbtaAlertSummary>()
+                val out = mutableListOf<com.saarlabs.tminus.model.response.MbtaAlertSummary>()
                 paginateJsonApi(
                     path = "alerts",
                     pageLimit = 50,
@@ -335,7 +335,7 @@ public class MbtaV3Client(private val apiKey: String?) {
                         val header = attrs["header"]?.jsonPrimitive?.content ?: continue
                         val effect = attrs["effect"]?.jsonPrimitive?.content
                         out.add(
-                            com.mbta.tid.mbta_app.model.response.MbtaAlertSummary(
+                            com.saarlabs.tminus.model.response.MbtaAlertSummary(
                                 id = id,
                                 header = header,
                                 effect = effect,

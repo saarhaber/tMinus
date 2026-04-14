@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.android.widget
+package com.saarlabs.tminus.android.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Intent
@@ -55,10 +55,10 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import com.mbta.tid.mbta_app.model.Stop
-import com.mbta.tid.mbta_app.model.WidgetTripConfig
-import com.mbta.tid.mbta_app.model.response.ApiResult
-import com.mbta.tid.mbta_app.model.response.GlobalData
+import com.saarlabs.tminus.model.Stop
+import com.saarlabs.tminus.model.WidgetTripConfig
+import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import kotlinx.coroutines.Dispatchers

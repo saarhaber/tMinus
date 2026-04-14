@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.model
+package com.saarlabs.tminus.model
 
 /** GTFS route types as returned by the MBTA V3 API on [Route.type]. */
 public enum class RouteType {

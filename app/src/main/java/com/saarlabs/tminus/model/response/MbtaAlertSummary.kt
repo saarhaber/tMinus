@@ -1,4 +1,4 @@
-package com.mbta.tid.mbta_app.model.response
+package com.saarlabs.tminus.model.response
 
 /** Minimal alert payload for accessibility / elevator notifications. */
 public data class MbtaAlertSummary(
