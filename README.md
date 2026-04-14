@@ -1,6 +1,6 @@
 # tMinus
 
-<img src="logo.png" alt="tMinus logo" width="160" />
+<img src="app/src/main/res/drawable-nodpi/ic_brand_logo.png" alt="tMinus logo" width="160" />
 
 Open-source Android widgets and tools for MBTA riders. Application ID: **`com.saarlabs.tminus`**. The first feature is a **home screen trip widget** (Jetpack Glance) based on the contribution in [mbta/mobile_app#1593](https://github.com/mbta/mobile_app/pull/1593), adapted to call the public **MBTA V3 API** directly.
 
@@ -41,22 +41,6 @@ GitHub Actions builds a debug APK on each push and uploads it as a workflow arti
 **Rolling build from `main`:** each merge to `main` updates the prerelease [**Latest main (debug)**](https://github.com/saarhaber/Tminus/releases/tag/latest-main) on the Releases page with a fresh `app-debug.apk` (tag `latest-main`). The release title and description include a **Built (UTC)** time so you can tell when the APK last changed—GitHub’s own “published” date for that rolling entry can stay stale.
 
 **Versioned release:** create and push a tag such as `v0.1.0`; the [tag release workflow](.github/workflows/release-apk.yml) attaches the debug APK to that numbered release.
-
-### Create the GitHub repository (owner: saarhaber)
-
-This environment cannot create repositories under your personal account. On your machine, with the [GitHub CLI](https://cli.github.com/) logged in as `saarhaber`:
-
-```bash
-cd /path/to/Tminus
-gh repo create saarhaber/Tminus --public --source=. --remote=origin --push
-```
-
-Or create an empty repo named `Tminus` on GitHub, then:
-
-```bash
-git remote add origin https://github.com/saarhaber/Tminus.git
-git push -u origin main
-```
 
 ## License
 

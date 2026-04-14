@@ -73,6 +73,8 @@
     <string name="notif_accessibility_body">%1$s: %2$s</string>
 
     <string name="stop_search_hint">Search stops…</string>
+    <string name="stop_favorite">Add to favorites</string>
+    <string name="stop_unfavorite">Remove from favorites</string>
 
     <string name="last_train_list_title">Last / first train</string>
     <string name="last_train_add">Add alert</string>

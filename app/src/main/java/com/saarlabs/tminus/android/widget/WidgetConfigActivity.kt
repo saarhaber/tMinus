@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.saarlabs.tminus.FavoriteStopsStore
+import com.saarlabs.tminus.sortStopsWithFavoritesFirst
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.WidgetTripConfig
 import com.saarlabs.tminus.model.response.ApiResult
@@ -120,6 +124,8 @@ private fun WidgetConfigScreen(
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
+    val favoriteStore = remember(context) { FavoriteStopsStore(context) }
+    var favoriteIds by remember { mutableStateOf(favoriteStore.getIds()) }
     val coroutineScope = rememberCoroutineScope()
     var globalResponse by remember { mutableStateOf<GlobalData?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
@@ -171,7 +177,7 @@ private fun WidgetConfigScreen(
     }
 
     val selectableStops =
-        remember(globalResponse, searchQuery, fromStop, reachableToStops, reachableLoadError) {
+        remember(globalResponse, searchQuery, fromStop, reachableToStops, reachableLoadError, favoriteIds) {
             globalResponse?.let { global ->
                 val query = searchQuery.trim().lowercase()
                 val stops =
@@ -184,11 +190,13 @@ private fun WidgetConfigScreen(
                             else -> reachableToStops!!
                         }
                     }
-                if (query.isEmpty()) {
-                    stops
-                } else {
-                    stops.filter { it.name.lowercase().contains(query) }
-                }
+                val filtered =
+                    if (query.isEmpty()) {
+                        stops
+                    } else {
+                        stops.filter { it.name.lowercase().contains(query) }
+                    }
+                sortStopsWithFavoritesFirst(filtered, favoriteIds, global.stops)
             } ?: emptyList()
         }
 

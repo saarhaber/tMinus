@@ -13,8 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.saarlabs.tminus.FavoriteStopsStore
+import com.saarlabs.tminus.sortStopsWithFavoritesFirst
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
@@ -47,6 +54,8 @@ public fun StopPairPicker(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val favoriteStore = remember(context) { FavoriteStopsStore(context) }
+    var favoriteIds by remember { mutableStateOf(favoriteStore.getIds()) }
     var globalResponse by remember { mutableStateOf<GlobalData?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
     var loadingTimeout by remember { mutableStateOf(false) }
@@ -98,7 +107,7 @@ public fun StopPairPicker(
     }
 
     val selectableStops =
-        remember(globalResponse, searchQuery, fromStop, reachableToStops, reachableLoadError) {
+        remember(globalResponse, searchQuery, fromStop, reachableToStops, reachableLoadError, favoriteIds) {
             globalResponse?.let { global ->
                 val query = searchQuery.trim().lowercase()
                 val stops =
@@ -111,7 +120,9 @@ public fun StopPairPicker(
                             else -> reachableToStops!!
                         }
                     }
-                if (query.isEmpty()) stops else stops.filter { it.name.lowercase().contains(query) }
+                val filtered =
+                    if (query.isEmpty()) stops else stops.filter { it.name.lowercase().contains(query) }
+                sortStopsWithFavoritesFirst(filtered, favoriteIds, global.stops)
             } ?: emptyList()
         }
 
@@ -266,35 +277,61 @@ public fun StopPairPicker(
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         items(selectableStops, key = { it.id }) { stop ->
                             val resolved = stop.resolveParent(global.stops)
+                            val fav = resolved.id in favoriteIds
                             Row(
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .clickable {
-                                            if (fromStop == null) {
-                                                fromStop = resolved
-                                                searchQuery = ""
-                                            } else {
-                                                if (resolved.id == fromStop!!.id) {
-                                                    Toast.makeText(
-                                                            context,
-                                                            context.getString(R.string.widget_select_different_stops),
-                                                            Toast.LENGTH_SHORT,
-                                                        )
-                                                        .show()
-                                                } else {
-                                                    toStop = resolved
-                                                    searchQuery = ""
-                                                }
-                                            }
-                                        }
                                         .background(
                                             MaterialTheme.colorScheme.surfaceVariant,
                                             RoundedCornerShape(8.dp),
                                         )
-                                        .padding(12.dp),
+                                        .padding(vertical = 4.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(resolved.name, style = MaterialTheme.typography.bodyLarge)
+                                IconButton(
+                                    onClick = {
+                                        favoriteStore.toggle(resolved.id)
+                                        favoriteIds = favoriteStore.getIds()
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = if (fav) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                        contentDescription =
+                                            stringResource(
+                                                if (fav) R.string.stop_unfavorite else R.string.stop_favorite,
+                                            ),
+                                        tint =
+                                            if (fav) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                Text(
+                                    text = resolved.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier =
+                                        Modifier.weight(1f)
+                                            .clickable {
+                                                if (fromStop == null) {
+                                                    fromStop = resolved
+                                                    searchQuery = ""
+                                                } else {
+                                                    if (resolved.id == fromStop!!.id) {
+                                                        Toast.makeText(
+                                                                context,
+                                                                context.getString(
+                                                                    R.string.widget_select_different_stops,
+                                                                ),
+                                                                Toast.LENGTH_SHORT,
+                                                            )
+                                                            .show()
+                                                    } else {
+                                                        toStop = resolved
+                                                        searchQuery = ""
+                                                    }
+                                                }
+                                            }
+                                            .padding(vertical = 8.dp, horizontal = 4.dp),
+                                )
                             }
                         }
                     }

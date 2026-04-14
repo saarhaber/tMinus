@@ -2,12 +2,18 @@ package com.saarlabs.tminus.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -17,9 +23,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.saarlabs.tminus.FavoriteStopsStore
+import com.saarlabs.tminus.sortStopsWithFavoritesFirst
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
@@ -33,6 +43,9 @@ public fun StopSearchPicker(
     onStopChosen: (Stop) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val favoriteStore = remember(context) { FavoriteStopsStore(context) }
+    var favoriteIds by remember { mutableStateOf(favoriteStore.getIds()) }
     var global by remember { mutableStateOf<GlobalData?>(null) }
     var loadError by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
@@ -46,10 +59,11 @@ public fun StopSearchPicker(
     }
 
     val stops =
-        remember(global, query) {
+        remember(global, query, favoriteIds) {
             global?.getParentStopsForSelection()?.let { list ->
                 val q = query.trim().lowercase()
-                if (q.isEmpty()) list else list.filter { it.name.lowercase().contains(q) }
+                val filtered = if (q.isEmpty()) list else list.filter { it.name.lowercase().contains(q) }
+                sortStopsWithFavoritesFirst(filtered, favoriteIds, global!!.stops)
             } ?: emptyList()
         }
 
@@ -83,15 +97,37 @@ public fun StopSearchPicker(
         )
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(stops, key = { it.id }) { stop ->
-                val resolved = stop.resolveParent(global!!.stops)
-                Text(
-                    text = resolved.name,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .clickable { onStopChosen(resolved) }
-                            .padding(16.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                val g = global!!
+                val resolved = stop.resolveParent(g.stops)
+                val fav = resolved.id in favoriteIds
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(
+                        onClick = {
+                            favoriteStore.toggle(resolved.id)
+                            favoriteIds = favoriteStore.getIds()
+                        },
+                    ) {
+                        Icon(
+                            imageVector = if (fav) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                            contentDescription =
+                                stringResource(if (fav) R.string.stop_unfavorite else R.string.stop_favorite),
+                            tint =
+                                if (fav) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        text = resolved.name,
+                        modifier =
+                            Modifier.weight(1f)
+                                .clickable { onStopChosen(resolved) }
+                                .padding(top = 16.dp, bottom = 16.dp, end = 16.dp),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
             }
         }
     }
