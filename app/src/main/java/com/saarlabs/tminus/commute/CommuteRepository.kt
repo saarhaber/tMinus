@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.saarlabs.tminus.commute.worker.NotificationScheduler
 import com.saarlabs.tminus.commute.worker.TminusNotificationWorker
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ internal class CommuteRepository(private val context: Context) {
                 )
                 .apply()
             scheduleWorker()
+            NotificationScheduler.enqueueImmediateRun(context)
         }
 
     private fun scheduleWorker() {

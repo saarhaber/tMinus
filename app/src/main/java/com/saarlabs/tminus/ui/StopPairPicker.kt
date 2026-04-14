@@ -50,6 +50,7 @@ public fun StopPairPicker(
     var loadError by remember { mutableStateOf<String?>(null) }
     var loadingTimeout by remember { mutableStateOf(false) }
     var reachableToStops by remember { mutableStateOf<List<Stop>?>(null) }
+    var reachableLoadError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         loadError = null
@@ -77,6 +78,7 @@ public fun StopPairPicker(
         val g = globalResponse
         val from = fromStop
         reachableToStops = null
+        reachableLoadError = null
         if (g != null && from != null) {
             when (
                 val r =
@@ -85,20 +87,27 @@ public fun StopPairPicker(
                     }
             ) {
                 is ApiResult.Ok -> reachableToStops = r.data
-                is ApiResult.Error -> reachableToStops = emptyList()
+                is ApiResult.Error -> {
+                    reachableToStops = emptyList()
+                    reachableLoadError = r.message
+                }
             }
         }
     }
 
     val selectableStops =
-        remember(globalResponse, searchQuery, fromStop, reachableToStops) {
+        remember(globalResponse, searchQuery, fromStop, reachableToStops, reachableLoadError) {
             globalResponse?.let { global ->
                 val query = searchQuery.trim().lowercase()
                 val stops =
                     if (fromStop == null) {
                         global.getParentStopsForSelection()
                     } else {
-                        reachableToStops ?: emptyList()
+                        when {
+                            reachableToStops == null -> emptyList()
+                            reachableLoadError != null -> global.getParentStopsForSelection()
+                            else -> reachableToStops!!
+                        }
                     }
                 if (query.isEmpty()) stops else stops.filter { it.name.lowercase().contains(query) }
             } ?: emptyList()
@@ -182,14 +191,26 @@ public fun StopPairPicker(
                 }
                 else -> {
                     val global = globalResponse!!
-                    Text(
-                        stringResource(
-                            if (fromStop == null) R.string.widget_selecting_from
-                            else R.string.widget_selecting_to
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        Text(
+                            stringResource(
+                                if (fromStop == null) R.string.widget_selecting_from
+                                else R.string.widget_selecting_to
+                            ),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        if (fromStop != null && reachableLoadError != null) {
+                            Text(
+                                stringResource(
+                                    R.string.widget_destinations_unavailable,
+                                    reachableLoadError!!,
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 6.dp),
+                            )
+                        }
+                    }
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         items(selectableStops, key = { it.id }) { stop ->
                             val resolved = stop.resolveParent(global.stops)

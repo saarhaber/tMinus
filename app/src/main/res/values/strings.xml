@@ -66,10 +66,11 @@
     <string name="last_train_add">Add alert</string>
     <string name="last_train_list_empty">No alerts yet. Add one for the last train home or the first train of the morning—notifications use scheduled times from the MBTA API.</string>
     <string name="last_train_editor_title">Train time alert</string>
-    <string name="last_train_help">Pick route, direction (0 or 1), and stop. For “last train,” we take the latest scheduled departure in the evening window. For “first train,” the earliest in the morning window. Direction IDs match the MBTA API (check trip headsigns in the official app if unsure).</string>
+    <string name="last_train_help">Pick route, direction, and stop. For “last train,” we take the latest scheduled departure in the evening window. For “first train,” the earliest in the morning window. Direction labels come from the MBTA API (e.g. inbound/outbound and destination).</string>
     <string name="last_train_name">Name</string>
-    <string name="last_train_route">Route id (e.g. Orange, Red, CR-Lowell)</string>
-    <string name="last_train_direction">Direction id</string>
+    <string name="last_train_route">Route</string>
+    <string name="last_train_route_unknown">No match for route id “%1$s” in loaded data—pick a route from the list or check spelling.</string>
+    <string name="last_train_direction">Direction</string>
     <string name="last_train_mode_label">Mode</string>
     <string name="last_train_mode_last">Last train</string>
     <string name="last_train_mode_first">First train</string>
@@ -85,7 +86,7 @@
     <string name="access_list_empty">Watch a route and station: when MBTA posts elevator or escalator alerts whose text matches that station, you get notified.</string>
     <string name="access_editor_title">Accessibility watch</string>
     <string name="access_name">Name</string>
-    <string name="access_route">Route id</string>
+    <string name="access_route">Route</string>
     <string name="access_stop_picked">Station: %1$s</string>
     <string name="access_help">We fetch active alerts for the route and notify when the alert mentions your station (by name). Not every outage is tagged to a stop id—check mbta.com for full detail.</string>
 
@@ -130,6 +131,7 @@
     <string name="widget_save_error">Failed to save. Please try again.</string>
     <string name="widget_loading_timeout_tminus">Unable to load stops. Check your connection or add a V3 API key in Tminus settings, then try again.</string>
     <string name="widget_select_different_stops">Choose a different destination.</string>
+    <string name="widget_destinations_unavailable">Could not load destinations for this stop (%1$s). Check your connection or add a V3 API key in Settings, then try again.</string>
     <string name="widget_configure">Tap to configure</string>
     <string name="widget_set_from_to">Set your from and to stops</string>
     <string name="widget_unable_to_load">Unable to load</string>

@@ -13,6 +13,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -30,8 +35,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.saarlabs.tminus.model.Route
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.features.LastTrainMode
@@ -39,7 +46,7 @@ import com.saarlabs.tminus.features.LastTrainProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 public fun LastTrainEditorScreen(
     initial: LastTrainProfile?,
@@ -61,17 +68,24 @@ public fun LastTrainEditorScreen(
     }
     var enabled by remember { mutableStateOf(initial?.enabled ?: true) }
     var showStopDialog by remember { mutableStateOf(false) }
+    var globalData by remember { mutableStateOf<GlobalData?>(null) }
+    var routeMenuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (initial != null) {
-            when (val r = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }) {
-                is ApiResult.Ok -> {
+        when (val r = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }) {
+            is ApiResult.Ok -> {
+                globalData = r.data
+                if (initial != null) {
                     stop = r.data.getStop(initial.stopId)?.resolveParent(r.data.stops)
                 }
-                is ApiResult.Error -> {}
             }
+            is ApiResult.Error -> {}
         }
     }
+
+    val routeList: List<Route> =
+        remember(globalData) { globalData?.let { routesForDropdown(it.routes) } ?: emptyList() }
+    val selectedRoute: Route? = routeList.find { it.id == routeId }
 
     Column(
         modifier =
@@ -87,13 +101,52 @@ public fun LastTrainEditorScreen(
             label = { Text(stringResource(R.string.last_train_name)) },
             modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
-            value = routeId,
-            onValueChange = { routeId = it },
-            label = { Text(stringResource(R.string.last_train_route)) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
+        if (routeList.isNotEmpty()) {
+            ExposedDropdownMenuBox(
+                expanded = routeMenuExpanded,
+                onExpandedChange = { routeMenuExpanded = !routeMenuExpanded },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                OutlinedTextField(
+                    value = selectedRoute?.label ?: routeId,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.last_train_route)) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = routeMenuExpanded) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    singleLine = true,
+                )
+                ExposedDropdownMenu(
+                    expanded = routeMenuExpanded,
+                    onDismissRequest = { routeMenuExpanded = false },
+                ) {
+                    routeList.forEach { r ->
+                        DropdownMenuItem(
+                            text = { Text("${r.label} (${r.id})") },
+                            onClick = {
+                                routeId = r.id
+                                routeMenuExpanded = false
+                            },
+                        )
+                    }
+                }
+            }
+            if (selectedRoute == null) {
+                Text(
+                    stringResource(R.string.last_train_route_unknown, routeId),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        } else {
+            OutlinedTextField(
+                value = routeId,
+                onValueChange = { routeId = it },
+                label = { Text(stringResource(R.string.last_train_route)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
 
         Text(stringResource(R.string.last_train_direction), style = MaterialTheme.typography.titleSmall)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -101,7 +154,7 @@ public fun LastTrainEditorScreen(
                 androidx.compose.material3.FilterChip(
                     selected = directionId == d,
                     onClick = { directionId = d },
-                    label = { Text(d.toString()) },
+                    label = { Text(directionLabelForRoute(selectedRoute, d)) },
                 )
             }
         }
@@ -220,7 +273,11 @@ public fun LastTrainEditorScreen(
                     )
                 onSave(profile)
             },
-            enabled = name.isNotBlank() && stop != null && routeId.isNotBlank(),
+            enabled =
+                name.isNotBlank() &&
+                    stop != null &&
+                    routeId.isNotBlank() &&
+                    (routeList.isEmpty() || selectedRoute != null),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.commute_save))
