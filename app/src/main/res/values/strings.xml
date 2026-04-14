@@ -8,7 +8,7 @@
     <string name="nav_settings">Settings</string>
 
     <string name="home_title">Tminus</string>
-    <string name="home_body">Add the MBTA Trip widget from your home screen, then pick from and to stops. Set up daily commutes for leave-time and arrival notifications. Use Settings for API keys if you need higher rate limits.</string>
+    <string name="home_body">Add the MBTA Trip widget from your home screen, then pick from and to stops. Set up daily commutes for leave-time and arrival notifications. Everything works without an API key; open Settings to add one only if you hit rate limits.</string>
     <string name="home_commutes_button">Commutes &amp; notifications</string>
     <string name="home_last_train_button">Last / first train alerts</string>
     <string name="home_access_button">Elevator &amp; station alerts</string>
@@ -96,13 +96,13 @@
     <string name="roadmap_feature_api_keys">Optional MBTA V3 API key field</string>
 
     <string name="settings_api_keys_title">API key</string>
-    <string name="settings_api_keys_body">Tminus uses the MBTA V3 API for schedules and stops. Optionally add a key from the developer portal below for higher rate limits.</string>
+    <string name="settings_api_keys_body">Tminus uses the MBTA V3 API for schedules, stops, and alerts. The home screen widget, commutes and notifications, last/first train alerts, and accessibility watches all work without a key. Add a free key from the portal below if you see rate-limit errors (HTTP 429) or repeated load failures—higher limits are the only reason to save one.</string>
     <string name="settings_link_v3_portal">V3 API portal — request a free key</string>
     <string name="settings_link_v3_swagger">V3 API reference (Swagger)</string>
-    <string name="settings_v3_key_label">MBTA V3 API key (optional)</string>
+    <string name="settings_v3_key_label">MBTA V3 API key (optional — for rate limits)</string>
     <string name="settings_v3_key_hint_saved">Saved on this device. You can replace or clear it anytime.</string>
     <string name="settings_v3_key_hint_unsaved">You have unsaved changes — tap Save to apply.</string>
-    <string name="settings_v3_key_hint_empty">No key saved. The app works without one; add a key if you hit rate limits.</string>
+    <string name="settings_v3_key_hint_empty">No key saved. All features work without one; add a key if the API throttles you (429) or loads keep failing.</string>
     <string name="settings_save_keys">Save</string>
     <string name="settings_api_key_saved_snackbar">API key saved</string>
     <string name="roadmap_feature_roadmap_screen">This roadmap screen</string>
