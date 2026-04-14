@@ -1,6 +1,7 @@
 /.gradle/
 /build/
 /app/build/
+/network-json/build/
 
 # APKs are distributed via GitHub Releases, not committed
 /releases/

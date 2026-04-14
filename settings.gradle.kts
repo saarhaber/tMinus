@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "Tminus"
 
 include(":app")
+include(":network-json")

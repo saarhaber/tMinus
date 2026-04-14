@@ -4,39 +4,52 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * JSON:API uses JSON `null` for empty to-one links. That deserializes as [JsonNull], not Kotlin
- * `null`, so `element?.jsonObject` still calls [JsonElement.jsonObject] and throws.
+ * `null`, so `element?.jsonObject` still calls [JsonElement.jsonObject] and throws when the link is
+ * empty.
  */
-internal fun JsonElement?.asJsonObjectOrNull(): JsonObject? =
+public fun JsonElement?.asJsonObjectOrNull(): JsonObject? =
     when (this) {
         null, JsonNull -> null
         is JsonObject -> this
         else -> null
     }
 
-internal fun JsonElement?.asJsonArrayOrNull(): JsonArray? =
+public fun JsonElement?.asJsonArrayOrNull(): JsonArray? =
     when (this) {
         null, JsonNull -> null
         is JsonArray -> this
         else -> null
     }
 
+/**
+ * Treats JSON `null` as absent for optional primitive attributes (e.g. latitude). [JsonNull] is a
+ * [JsonPrimitive] at runtime; mapping it to Kotlin `null` avoids propagating sentinel nulls into
+ * domain parsing.
+ */
+public fun JsonElement?.asJsonPrimitiveOrNull(): JsonPrimitive? =
+    when (this) {
+        null, JsonNull -> null
+        is JsonPrimitive -> this
+        else -> null
+    }
+
 /** Primary `data` array from a JSON:API document (empty if missing or not an array). */
-internal fun JsonObject.dataArrayElements(): List<JsonElement> =
+public fun JsonObject.dataArrayElements(): List<JsonElement> =
     get("data")?.asJsonArrayOrNull()?.toList() ?: emptyList()
 
 /** `included` array from a JSON:API document. */
-internal fun JsonObject.includedArrayElements(): List<JsonElement> =
+public fun JsonObject.includedArrayElements(): List<JsonElement> =
     get("included")?.asJsonArrayOrNull()?.toList() ?: emptyList()
 
 /**
  * Reads `relationships[name].data.id` for a to-one link. Returns null if the link is missing or
  * JSON `null` (empty link).
  */
-internal fun JsonObject.jsonApiRelationshipDataId(relationshipName: String): String? =
+public fun JsonObject.jsonApiRelationshipDataId(relationshipName: String): String? =
     get("relationships")
         ?.asJsonObjectOrNull()
         ?.get(relationshipName)
@@ -44,5 +57,5 @@ internal fun JsonObject.jsonApiRelationshipDataId(relationshipName: String): Str
         ?.get("data")
         ?.asJsonObjectOrNull()
         ?.get("id")
-        ?.jsonPrimitive
+        ?.asJsonPrimitiveOrNull()
         ?.content

@@ -31,8 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * MBTA V3 JSON:API ([https://www.mbta.com/developers/v3-api](https://www.mbta.com/developers/v3-api)).
@@ -76,8 +76,8 @@ public class MbtaV3Client(private val apiKey: String?) {
                     mergeIncludedStops(doc, stops)
                     for (el in doc.dataArrayElements()) {
                         val o = el.asJsonObjectOrNull() ?: continue
-                        if (o["type"]?.jsonPrimitive?.content != "stop") continue
-                        val id = o["id"]?.jsonPrimitive?.content ?: continue
+                        if (o["type"]?.asJsonPrimitiveOrNull()?.content != "stop") continue
+                        val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
                         parseStopFromResource(o)?.let { stops[id] = it }
                     }
                 }
@@ -90,8 +90,8 @@ public class MbtaV3Client(private val apiKey: String?) {
                 ) { doc ->
                     for (el in doc.dataArrayElements()) {
                         val o = el.asJsonObjectOrNull() ?: continue
-                        if (o["type"]?.jsonPrimitive?.content != "route") continue
-                        val id = o["id"]?.jsonPrimitive?.content ?: continue
+                        if (o["type"]?.asJsonPrimitiveOrNull()?.content != "route") continue
+                        val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
                         parseRoute(o)?.let { routes[id] = it }
                     }
                 }
@@ -122,7 +122,7 @@ public class MbtaV3Client(private val apiKey: String?) {
                 ) { doc ->
                     for (el in doc.dataArrayElements()) {
                         val patternObj = el.asJsonObjectOrNull() ?: continue
-                        val patternId = patternObj["id"]?.jsonPrimitive?.content ?: continue
+                        val patternId = patternObj["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
                         val repTripId =
                             patternObj.jsonApiRelationshipDataId("representative_trip")
                         val tripId =
@@ -147,7 +147,7 @@ public class MbtaV3Client(private val apiKey: String?) {
                                     it["attributes"]
                                         ?.asJsonObjectOrNull()
                                         ?.get("stop_sequence")
-                                        ?.jsonPrimitive
+                                        ?.asJsonPrimitiveOrNull()
                                         ?.intOrNull ?: 0
                                 }
                                 .mapNotNull { sObj ->
@@ -198,7 +198,7 @@ public class MbtaV3Client(private val apiKey: String?) {
             ?.firstOrNull()
             ?.asJsonObjectOrNull()
             ?.get("id")
-            ?.jsonPrimitive
+            ?.asJsonPrimitiveOrNull()
             ?.content
             ?.takeIf { !it.startsWith("canonical-") }
     }
@@ -244,21 +244,21 @@ public class MbtaV3Client(private val apiKey: String?) {
 
         for (el in doc.dataArrayElements()) {
             val sObj = el.asJsonObjectOrNull() ?: continue
-            val id = sObj["id"]?.jsonPrimitive?.content ?: continue
+            val id = sObj["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
             val attrs = sObj["attributes"]?.asJsonObjectOrNull() ?: continue
             val tripId = sObj.jsonApiRelationshipDataId("trip") ?: continue
 
             val depStr =
-                attrs["departure_time"]?.jsonPrimitive?.content
-                    ?: attrs["arrival_time"]?.jsonPrimitive?.content
+                attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
+                    ?: attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
             val arrStr =
-                attrs["arrival_time"]?.jsonPrimitive?.content
-                    ?: attrs["departure_time"]?.jsonPrimitive?.content
+                attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
+                    ?: attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
             val dep = depStr?.let { EasternTimeInstant(Instant.parse(it)) }
             val arr = arrStr?.let { EasternTimeInstant(Instant.parse(it)) }
             val stopId = sObj.jsonApiRelationshipDataId("stop") ?: continue
-            val seq = attrs["stop_sequence"]?.jsonPrimitive?.intOrNull ?: continue
-            val headsign = attrs["stop_headsign"]?.jsonPrimitive?.content
+            val seq = attrs["stop_sequence"]?.asJsonPrimitiveOrNull()?.intOrNull ?: continue
+            val headsign = attrs["stop_headsign"]?.asJsonPrimitiveOrNull()?.content
 
             schedules.add(
                 com.saarlabs.tminus.model.Schedule(
@@ -297,11 +297,11 @@ public class MbtaV3Client(private val apiKey: String?) {
                 ) { doc ->
                     for (el in doc.dataArrayElements()) {
                         val o = el.asJsonObjectOrNull() ?: continue
-                        if (o["type"]?.jsonPrimitive?.content != "alert") continue
-                        val id = o["id"]?.jsonPrimitive?.content ?: continue
+                        if (o["type"]?.asJsonPrimitiveOrNull()?.content != "alert") continue
+                        val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
                         val attrs = o["attributes"]?.asJsonObjectOrNull() ?: continue
-                        val header = attrs["header"]?.jsonPrimitive?.content ?: continue
-                        val effect = attrs["effect"]?.jsonPrimitive?.content
+                        val header = attrs["header"]?.asJsonPrimitiveOrNull()?.content ?: continue
+                        val effect = attrs["effect"]?.asJsonPrimitiveOrNull()?.content
                         out.add(
                             com.saarlabs.tminus.model.response.MbtaAlertSummary(
                                 id = id,
@@ -345,8 +345,8 @@ public class MbtaV3Client(private val apiKey: String?) {
                     val attrs =
                         el.asJsonObjectOrNull()?.get("attributes")?.asJsonObjectOrNull() ?: continue
                     val depStr =
-                        attrs["departure_time"]?.jsonPrimitive?.content
-                            ?: attrs["arrival_time"]?.jsonPrimitive?.content
+                        attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
+                            ?: attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: continue
                     val et = EasternTimeInstant(Instant.parse(depStr))
                     if (latest == null || et > latest) latest = et
@@ -385,8 +385,8 @@ public class MbtaV3Client(private val apiKey: String?) {
                     val attrs =
                         el.asJsonObjectOrNull()?.get("attributes")?.asJsonObjectOrNull() ?: continue
                     val depStr =
-                        attrs["departure_time"]?.jsonPrimitive?.content
-                            ?: attrs["arrival_time"]?.jsonPrimitive?.content
+                        attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
+                            ?: attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: continue
                     val et = EasternTimeInstant(Instant.parse(depStr))
                     if (earliest == null || et < earliest) earliest = et
@@ -427,8 +427,8 @@ public class MbtaV3Client(private val apiKey: String?) {
     private fun mergeIncludedStops(doc: JsonObject, stops: MutableMap<String, Stop>) {
         for (el in doc.includedArrayElements()) {
             val o = el.asJsonObjectOrNull() ?: continue
-            if (o["type"]?.jsonPrimitive?.content != "stop") continue
-            val id = o["id"]?.jsonPrimitive?.content ?: continue
+            if (o["type"]?.asJsonPrimitiveOrNull()?.content != "stop") continue
+            val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
             parseStopFromResource(o)?.let { stops[id] = it }
         }
     }
@@ -436,7 +436,7 @@ public class MbtaV3Client(private val apiKey: String?) {
     private fun findIncluded(doc: JsonObject, type: String, id: String): JsonObject? {
         for (el in doc.includedArrayElements()) {
             val o = el.asJsonObjectOrNull() ?: continue
-            if (o["type"]?.jsonPrimitive?.content == type && o["id"]?.jsonPrimitive?.content == id) {
+            if (o["type"]?.asJsonPrimitiveOrNull()?.content == type && o["id"]?.asJsonPrimitiveOrNull()?.content == id) {
                 return o
             }
         }
@@ -444,13 +444,13 @@ public class MbtaV3Client(private val apiKey: String?) {
     }
 
     private fun parseRoute(resource: JsonObject): Route? {
-        val id = resource["id"]?.jsonPrimitive?.content ?: return null
+        val id = resource["id"]?.asJsonPrimitiveOrNull()?.content ?: return null
         val attrs = resource["attributes"]?.asJsonObjectOrNull() ?: return null
-        val typeInt = attrs["type"]?.jsonPrimitive?.intOrNull ?: return null
+        val typeInt = attrs["type"]?.asJsonPrimitiveOrNull()?.intOrNull ?: return null
         return Route(
             id = id,
             type = RouteType.fromGtfsType(typeInt),
-            color = attrs["color"]?.jsonPrimitive?.content ?: "000000",
+            color = attrs["color"]?.asJsonPrimitiveOrNull()?.content ?: "000000",
             directionNames =
                 attrs["direction_names"]?.asJsonArrayOrNull()?.map { it.jsonPrimitive.content }
                     ?: emptyList(),
@@ -458,31 +458,31 @@ public class MbtaV3Client(private val apiKey: String?) {
                 attrs["direction_destinations"]?.asJsonArrayOrNull()?.map { it.jsonPrimitive.content }
                     ?: emptyList(),
             isListedRoute =
-                attrs["listed_route"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: true,
-            longName = attrs["long_name"]?.jsonPrimitive?.content ?: "",
-            shortName = attrs["short_name"]?.jsonPrimitive?.content ?: "",
-            sortOrder = attrs["sort_order"]?.jsonPrimitive?.intOrNull ?: 0,
-            textColor = attrs["text_color"]?.jsonPrimitive?.content ?: "FFFFFF",
+                attrs["listed_route"]?.asJsonPrimitiveOrNull()?.content?.toBooleanStrictOrNull() ?: true,
+            longName = attrs["long_name"]?.asJsonPrimitiveOrNull()?.content ?: "",
+            shortName = attrs["short_name"]?.asJsonPrimitiveOrNull()?.content ?: "",
+            sortOrder = attrs["sort_order"]?.asJsonPrimitiveOrNull()?.intOrNull ?: 0,
+            textColor = attrs["text_color"]?.asJsonPrimitiveOrNull()?.content ?: "FFFFFF",
         )
     }
 
     private fun parseTrip(resource: JsonObject): Trip? {
-        val id = resource["id"]?.jsonPrimitive?.content ?: return null
+        val id = resource["id"]?.asJsonPrimitiveOrNull()?.content ?: return null
         val attrs = resource["attributes"]?.asJsonObjectOrNull() ?: return null
         val routeId = resource.jsonApiRelationshipDataId("route") ?: return null
         return Trip(
             id = id,
-            directionId = attrs["direction_id"]?.jsonPrimitive?.intOrNull ?: 0,
-            headsign = attrs["headsign"]?.jsonPrimitive?.content ?: "",
+            directionId = attrs["direction_id"]?.asJsonPrimitiveOrNull()?.intOrNull ?: 0,
+            headsign = attrs["headsign"]?.asJsonPrimitiveOrNull()?.content ?: "",
             routeId = routeId,
             routePatternId = resource.jsonApiRelationshipDataId("route_pattern"),
         )
     }
 
     private fun parseStopFromResource(resource: JsonObject): Stop? {
-        val id = resource["id"]?.jsonPrimitive?.content ?: return null
+        val id = resource["id"]?.asJsonPrimitiveOrNull()?.content ?: return null
         val attrs = resource["attributes"]?.asJsonObjectOrNull() ?: return null
-        val locTypeInt = attrs["location_type"]?.jsonPrimitive?.intOrNull ?: return null
+        val locTypeInt = attrs["location_type"]?.asJsonPrimitiveOrNull()?.intOrNull ?: return null
         val locationType =
             when (locTypeInt) {
                 0 -> LocationType.STOP
@@ -496,14 +496,14 @@ public class MbtaV3Client(private val apiKey: String?) {
             attrs["child_stop_ids"]?.asJsonArrayOrNull()?.map { it.jsonPrimitive.content }
                 ?: emptyList()
         val parentId = resource.jsonApiRelationshipDataId("parent_station")
-        val vehicleTypeInt = attrs["vehicle_type"]?.jsonPrimitive?.intOrNull
+        val vehicleTypeInt = attrs["vehicle_type"]?.asJsonPrimitiveOrNull()?.intOrNull
         return Stop(
             id = id,
-            latitude = attrs["latitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
-            longitude = attrs["longitude"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0,
-            name = attrs["name"]?.jsonPrimitive?.content ?: id,
+            latitude = attrs["latitude"]?.asJsonPrimitiveOrNull()?.content?.toDoubleOrNull() ?: 0.0,
+            longitude = attrs["longitude"]?.asJsonPrimitiveOrNull()?.content?.toDoubleOrNull() ?: 0.0,
+            name = attrs["name"]?.asJsonPrimitiveOrNull()?.content ?: id,
             locationType = locationType,
-            platformCode = attrs["platform_code"]?.jsonPrimitive?.content,
+            platformCode = attrs["platform_code"]?.asJsonPrimitiveOrNull()?.content,
             vehicleType = vehicleTypeInt?.let { RouteType.fromGtfsType(it) },
             childStopIds = childIds,
             parentStationId = parentId,
