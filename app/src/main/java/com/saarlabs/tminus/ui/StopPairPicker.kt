@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +74,7 @@ public fun StopPairPicker(
     var fromStop by remember { mutableStateOf<Stop?>(null) }
     var toStop by remember { mutableStateOf<Stop?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var saveValidationMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(fromStop, globalResponse) {
         val g = globalResponse
@@ -122,19 +124,43 @@ public fun StopPairPicker(
             TextButton(onClick = onCancel) { Text(stringResource(R.string.commute_cancel)) }
             Button(
                 onClick = {
+                    saveValidationMessage = null
                     val f = fromStop
                     val t = toStop
                     val g = globalResponse
-                    if (f != null && t != null && g != null) {
-                        val fr = g.getStop(f.id)?.resolveParent(g.stops) ?: return@Button
-                        val tr = g.getStop(t.id)?.resolveParent(g.stops) ?: return@Button
-                        onStopsChosen(fr, tr)
+                    val issues = mutableListOf<String>()
+                    if (g == null) {
+                        issues.add(context.getString(R.string.commute_save_need_stops_loading))
                     }
+                    if (f == null) {
+                        issues.add(context.getString(R.string.commute_validation_need_from_stop))
+                    }
+                    if (t == null) {
+                        issues.add(context.getString(R.string.commute_validation_need_to_stop))
+                    }
+                    if (issues.isNotEmpty()) {
+                        saveValidationMessage = issues.joinToString("\n")
+                        return@Button
+                    }
+                    val fr = g!!.getStop(f!!.id)?.resolveParent(g.stops)
+                    val tr = g.getStop(t!!.id)?.resolveParent(g.stops)
+                    if (fr == null || tr == null) {
+                        saveValidationMessage = context.getString(R.string.commute_save_stops_unresolved)
+                        return@Button
+                    }
+                    onStopsChosen(fr, tr)
                 },
-                enabled = fromStop != null && toStop != null,
             ) {
                 Text(stringResource(R.string.commute_use_stops))
             }
+        }
+        saveValidationMessage?.let { msg ->
+            Text(
+                text = msg,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
 
         if (fromStop != null) {
@@ -187,7 +213,16 @@ public fun StopPairPicker(
                     Text(stringResource(R.string.widget_loading_timeout_tminus))
                 }
                 globalResponse == null -> {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularProgressIndicator()
+                        Text(
+                            text = stringResource(R.string.loading),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
                 else -> {
                     val global = globalResponse!!
@@ -199,6 +234,23 @@ public fun StopPairPicker(
                             ),
                             style = MaterialTheme.typography.titleSmall,
                         )
+                        if (fromStop != null && reachableToStops == null && reachableLoadError == null) {
+                            Row(
+                                modifier = Modifier.padding(top = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                                Text(
+                                    text = stringResource(R.string.widget_loading_destinations),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
                         if (fromStop != null && reachableLoadError != null) {
                             Text(
                                 stringResource(

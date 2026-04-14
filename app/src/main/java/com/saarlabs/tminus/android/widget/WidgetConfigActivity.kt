@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -314,9 +315,9 @@ private fun WidgetConfigScreen(
                                 Column(
                                     modifier = Modifier.fillMaxWidth().padding(32.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
                                 ) {
                                     CircularProgressIndicator()
-                                    Spacer(modifier = Modifier.padding(16.dp))
                                     Text(
                                         text = stringResource(R.string.loading),
                                         style = MaterialTheme.typography.bodyMedium,
@@ -336,6 +337,23 @@ private fun WidgetConfigScreen(
                                             ),
                                         style = MaterialTheme.typography.titleSmall,
                                     )
+                                    if (fromStop != null && reachableToStops == null && reachableLoadError == null) {
+                                        Row(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                strokeWidth = 2.dp,
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.widget_loading_destinations),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                    }
                                     if (fromStop != null && reachableLoadError != null) {
                                         Text(
                                             text =
@@ -407,6 +425,7 @@ private fun WidgetConfigScreen(
                                                                         context,
                                                                         intArrayOf(appWidgetId),
                                                                     )
+                                                                    moveTaskToBack(true)
                                                                     onComplete()
                                                                 } catch (e: Exception) {
                                                                     android.util.Log.e(

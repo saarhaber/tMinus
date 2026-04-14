@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
@@ -132,6 +133,8 @@ public class TminusNotificationWorker(
                                 fromName,
                                 trip.minutesUntil,
                             ),
+                        backgroundArgb = argbFromHexOrNull(trip.route.color),
+                        contentArgb = argbFromHexOrNull(trip.route.textColor),
                     )
                 }
             }
@@ -151,6 +154,8 @@ public class TminusNotificationWorker(
                                     profile.name,
                                     toName,
                                 ),
+                            backgroundArgb = argbFromHexOrNull(trip.route.color),
+                            contentArgb = argbFromHexOrNull(trip.route.textColor),
                         )
                     }
                 }
@@ -332,6 +337,8 @@ public class TminusNotificationWorker(
         id: Int,
         title: String,
         text: String,
+        backgroundArgb: Int? = null,
+        contentArgb: Int? = null,
     ) {
         ensureChannel(applicationContext)
         val intent = Intent(applicationContext, MainActivity::class.java)
@@ -342,12 +349,25 @@ public class TminusNotificationWorker(
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
+        val bg = backgroundArgb ?: applicationContext.getColor(R.color.fill2)
+        val fg = contentArgb ?: applicationContext.getColor(R.color.key)
+        fun buildRemoteViews(): RemoteViews =
+            RemoteViews(applicationContext.packageName, R.layout.notification_commute).apply {
+                setTextViewText(R.id.notification_title, title)
+                setTextViewText(R.id.notification_text, text)
+                setInt(R.id.notification_root, "setBackgroundColor", bg)
+                setTextColor(R.id.notification_title, fg)
+                setTextColor(R.id.notification_text, fg)
+            }
+        val custom = buildRemoteViews()
         val notif =
             NotificationCompat.Builder(applicationContext, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(text)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                .setCustomContentView(custom)
+                .setCustomBigContentView(custom)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pi)
                 .setAutoCancel(true)
@@ -355,6 +375,13 @@ public class TminusNotificationWorker(
 
         NotificationManagerCompat.from(applicationContext).notify(id, notif)
     }
+
+    private fun argbFromHexOrNull(hex: String): Int? =
+        runCatching {
+            val clean = hex.trim().removePrefix("#")
+            val v = clean.toLong(16)
+            (0xFF000000L or v).toInt()
+        }.getOrNull()
 
     private fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

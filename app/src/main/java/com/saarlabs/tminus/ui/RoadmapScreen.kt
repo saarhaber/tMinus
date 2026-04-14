@@ -1,5 +1,8 @@
 package com.saarlabs.tminus.ui
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,12 +14,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.saarlabs.tminus.R
 
+private const val GITHUB_NEW_ISSUE_URL = "https://github.com/saarhaber/Tminus/issues/new"
+
 @Composable
 public fun RoadmapScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Column(
         modifier =
             modifier
@@ -66,6 +74,19 @@ public fun RoadmapScreen(modifier: Modifier = Modifier) {
             text = stringResource(R.string.roadmap_footer),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.roadmap_report_issue),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline,
+            modifier =
+                Modifier.clickable {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_NEW_ISSUE_URL)),
+                    )
+                },
         )
     }
 }

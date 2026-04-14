@@ -26,6 +26,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version = "3.0.1" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.7.3" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.6.1" }
+compose-reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version = "0.9.6" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]

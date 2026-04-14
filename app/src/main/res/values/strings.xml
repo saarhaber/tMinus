@@ -45,6 +45,14 @@
     <string name="commute_preview_leave">Approx. leave by:</string>
     <string name="commute_preview_none">No scheduled trip found in this window for today (schedules vary by day; try a different time window).</string>
     <string name="commute_preview_need_stops">Choose from and to stops first.</string>
+    <string name="commute_validation_need_name">Add a name for this commute.</string>
+    <string name="commute_validation_need_from_stop">Choose a starting stop.</string>
+    <string name="commute_validation_need_to_stop">Choose a destination stop.</string>
+    <string name="commute_validation_need_day">Select at least one day of the week.</string>
+    <string name="commute_save_need_stops_loading">Stops are still loading. Wait a moment and try again.</string>
+    <string name="commute_save_stops_unresolved">Could not resolve the selected stops. Try picking them again.</string>
+    <string name="commute_list_reorder_hint">Long-press a card to reorder. Swipe left to delete.</string>
+    <string name="commute_list_delete">Remove commute</string>
     <string name="commute_save">Save</string>
     <string name="commute_cancel">Cancel</string>
     <string name="commute_use_stops">Use these stops</string>
@@ -118,8 +126,12 @@
     <string name="roadmap_section_community">Community</string>
     <string name="roadmap_feature_contributing">Contributions welcome—see CONTRIBUTING.md on GitHub</string>
     <string name="roadmap_footer">Have an idea? Open an issue or PR on the Tminus repository.</string>
+    <string name="roadmap_report_issue">Report a bug or suggest a feature</string>
 
     <string name="widget_trip_description">Next trip from one stop to another</string>
+    <string name="widget_preview_route_label">CR · Inbound</string>
+    <string name="widget_preview_trip_summary">Natick Center → Back Bay · in 12 min</string>
+    <string name="widget_preview_times">7:42 AM → 8:18 AM</string>
     <string name="widget_configure_title">Configure Trip Widget</string>
     <string name="widget_from">From</string>
     <string name="widget_to">To</string>
@@ -127,6 +139,7 @@
     <string name="widget_select_to_stop">Select to stop</string>
     <string name="widget_selecting_from">Selecting from stop</string>
     <string name="widget_selecting_to">Selecting to stop</string>
+    <string name="widget_loading_destinations">Loading destinations…</string>
     <string name="widget_clear_stop">Clear</string>
     <string name="widget_save_error">Failed to save. Please try again.</string>
     <string name="widget_loading_timeout_tminus">Unable to load stops. Check your connection or add a V3 API key in Tminus settings, then try again.</string>

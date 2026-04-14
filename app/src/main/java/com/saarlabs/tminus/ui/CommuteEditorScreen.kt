@@ -75,6 +75,7 @@ public fun CommuteEditorScreen(
     var pickingStops by remember { mutableStateOf(initial == null) }
 
     var previewText by remember { mutableStateOf<String?>(null) }
+    var validationMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -210,6 +211,15 @@ public fun CommuteEditorScreen(
             Switch(checked = enabled, onCheckedChange = { enabled = it })
         }
 
+        validationMessage?.let { msg ->
+            Text(
+                text = msg,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+
         Spacer(Modifier.height(8.dp))
         Button(
             onClick = {
@@ -311,9 +321,26 @@ public fun CommuteEditorScreen(
         }
 
         RowHorizontalButtons(onCancel = onCancel, onSave = {
+            validationMessage = null
             val f = fromStop
             val t = toStop
-            if (f == null || t == null || name.isBlank()) return@RowHorizontalButtons
+            val issues = mutableListOf<String>()
+            if (name.isBlank()) {
+                issues.add(context.getString(R.string.commute_validation_need_name))
+            }
+            if (f == null) {
+                issues.add(context.getString(R.string.commute_validation_need_from_stop))
+            }
+            if (t == null) {
+                issues.add(context.getString(R.string.commute_validation_need_to_stop))
+            }
+            if (days.isEmpty()) {
+                issues.add(context.getString(R.string.commute_validation_need_day))
+            }
+            if (issues.isNotEmpty()) {
+                validationMessage = issues.joinToString("\n")
+                return@RowHorizontalButtons
+            }
             val hour = hourStr.toIntOrNull()?.coerceIn(0, 23) ?: 8
             val minute = minStr.toIntOrNull()?.coerceIn(0, 59) ?: 0
             val targetMinutes = hour * 60 + minute

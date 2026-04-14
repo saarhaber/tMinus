@@ -3,6 +3,7 @@
     android:configure="com.saarlabs.tminus.android.widget.WidgetConfigActivity"
     android:description="@string/widget_trip_description"
     android:initialLayout="@layout/widget_trip_loading"
+    android:previewLayout="@layout/widget_trip_preview"
     android:minWidth="180dp"
     android:minHeight="110dp"
     android:resizeMode="horizontal|vertical"
