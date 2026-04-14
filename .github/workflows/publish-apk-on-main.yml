@@ -35,17 +35,33 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --stacktrace
 
+      # GitHub keeps the original release `created_at` when we update this rolling release in
+      # place, so the Releases list can show a stale date. Expose an explicit build time in the
+      # title and body so each merge is visibly fresh.
+      - name: Rolling release metadata
+        id: rolling_meta
+        run: |
+          echo "build_time_utc=$(date -u +'%Y-%m-%d %H:%M UTC')" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
       # Single step: create/move tag, release, and upload assets (avoids empty releases
       # if a concurrent run was cancelled between `git push tag` and upload).
       - name: Publish rolling prerelease with APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest-main
-          name: Latest main (debug)
+          name: Latest main (debug) · ${{ steps.rolling_meta.outputs.build_time_utc }}
           body: |
-            Automated **debug** build from `main` at `${{ github.sha }}`.
+            Automated **debug** build from `main`.
+
+            | | |
+            |---|---|
+            | **Built (UTC)** | ${{ steps.rolling_meta.outputs.build_time_utc }} |
+            | **Commit** | [`${{ steps.rolling_meta.outputs.short_sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) |
 
             This prerelease is updated on every merge to `main`. For versioned installs, use a tagged release (`v*`) from the same Releases page.
+
+            *GitHub may still show an older “published” date for this rolling release—the **Built** row reflects this upload.*
           prerelease: true
           make_latest: "false"
           target_commitish: ${{ github.sha }}
