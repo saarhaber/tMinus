@@ -1,4 +1,4 @@
-# Tminus
+# tMinus
 
 Open-source Android widgets and tools for MBTA riders. Application ID: **`com.saarlabs.tminus`**. The first feature is a **home screen trip widget** (Jetpack Glance) based on the contribution in [mbta/mobile_app#1593](https://github.com/mbta/mobile_app/pull/1593), adapted to call the public **MBTA V3 API** directly.
 
@@ -45,11 +45,11 @@ GitHub Actions builds a debug APK on each push and uploads it as a workflow arti
 This environment cannot create repositories under your personal account. On your machine, with the [GitHub CLI](https://cli.github.com/) logged in as `saarhaber`:
 
 ```bash
-cd /path/to/Tminus
-gh repo create saarhaber/Tminus --public --source=. --remote=origin --push
+cd /path/to/tMinus
+gh repo create saarhaber/tMinus --public --source=. --remote=origin --push
 ```
 
-Or create an empty repo named `Tminus` on GitHub, then:
+Or create an empty repo named `tMinus` on GitHub, then:
 
 ```bash
 git remote add origin https://github.com/saarhaber/Tminus.git

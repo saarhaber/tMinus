@@ -7,16 +7,16 @@
     <application
         android:name=".TminusApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_launcher_foreground"
+        android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Tminus">
+        android:theme="@style/Theme.tMinus">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Tminus">
+            android:theme="@style/Theme.tMinus">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -26,12 +26,12 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Tminus" />
+            android:theme="@style/Theme.tMinus" />
 
         <activity
             android:name="com.saarlabs.tminus.android.widget.WidgetConfigActivity"
             android:exported="true"
-            android:theme="@style/Theme.Tminus">
+            android:theme="@style/Theme.tMinus">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
