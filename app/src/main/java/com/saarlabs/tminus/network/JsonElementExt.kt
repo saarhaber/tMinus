@@ -4,6 +4,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
@@ -21,6 +22,14 @@ internal fun JsonElement?.asJsonArrayOrNull(): JsonArray? =
     when (this) {
         null, JsonNull -> null
         is JsonArray -> this
+        else -> null
+    }
+
+/** JSON `null` or absent values must not use [JsonElement.jsonPrimitive] — it throws on [JsonNull]. */
+internal fun JsonElement?.asJsonPrimitiveOrNull(): JsonPrimitive? =
+    when (this) {
+        null, JsonNull -> null
+        is JsonPrimitive -> this
         else -> null
     }
 
@@ -44,5 +53,5 @@ internal fun JsonObject.jsonApiRelationshipDataId(relationshipName: String): Str
         ?.get("data")
         ?.asJsonObjectOrNull()
         ?.get("id")
-        ?.jsonPrimitive
+        ?.asJsonPrimitiveOrNull()
         ?.content
