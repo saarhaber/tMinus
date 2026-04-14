@@ -23,6 +23,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -58,17 +61,25 @@ public class MainActivity : ComponentActivity() {
                         startDestination = ROUTE_MAIN_TABS,
                     ) {
                         composable(ROUTE_MAIN_TABS) {
+                            var settingsV3 by remember {
+                                mutableStateOf(prefs.getString(SettingsKeys.KEY_V3_API, "") ?: "")
+                            }
+                            var settingsGtfs by remember {
+                                mutableStateOf(prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: "")
+                            }
                             TminusApp(
                                 rootNavController = rootNav,
-                                initialV3 = prefs.getString(SettingsKeys.KEY_V3_API, "") ?: "",
-                                initialGtfs = prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: "",
+                                initialV3 = settingsV3,
+                                initialGtfs = settingsGtfs,
                                 onSaveSettings = { v3, gtfs ->
                                     prefs.edit()
                                         .putString(SettingsKeys.KEY_V3_API, v3.ifBlank { null })
                                         .putString(SettingsKeys.KEY_GTFS_RT, gtfs.ifBlank { null })
-                                        .apply()
+                                        .commit()
                                     GlobalDataStore.invalidate()
                                     TminusApplication.refreshNetworking()
+                                    settingsV3 = prefs.getString(SettingsKeys.KEY_V3_API, "") ?: ""
+                                    settingsGtfs = prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: ""
                                 },
                             )
                         }
