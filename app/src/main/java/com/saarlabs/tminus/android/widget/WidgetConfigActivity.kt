@@ -50,11 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.WidgetTripConfig
 import com.saarlabs.tminus.model.response.ApiResult
@@ -62,10 +57,8 @@ import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 public class WidgetConfigActivity : ComponentActivity() {
 
@@ -381,45 +374,16 @@ private fun WidgetConfigScreen(
                                                                             appWidgetId,
                                                                             config,
                                                                         )
-                                                                    }
-                                                                    try {
-                                                                        val glanceManager =
-                                                                            GlanceAppWidgetManager(
-                                                                                context.applicationContext
-                                                                            )
-                                                                        val glanceId =
-                                                                            glanceManager.getGlanceIdBy(
-                                                                                appWidgetId
-                                                                            )
                                                                         MBTATripWidget()
-                                                                            .update(
+                                                                            .updateAll(
                                                                                 context.applicationContext,
-                                                                                glanceId,
                                                                             )
-                                                                    } catch (_: Exception) {}
-                                                                    delay(150)
+                                                                    }
                                                                     onComplete()
-                                                                    WorkManager.getInstance(context)
-                                                                        .enqueueUniqueWork(
-                                                                            "WidgetConfigUpdate",
-                                                                            ExistingWorkPolicy.REPLACE,
-                                                                            OneTimeWorkRequestBuilder<
-                                                                                    WidgetUpdateWorker>()
-                                                                                .setInputData(
-                                                                                    workDataOf(
-                                                                                        WidgetUpdateWorker
-                                                                                            .KEY_APP_WIDGET_IDS to
-                                                                                            intArrayOf(
-                                                                                                appWidgetId
-                                                                                            )
-                                                                                    )
-                                                                                )
-                                                                                .setInitialDelay(
-                                                                                    800,
-                                                                                    TimeUnit.MILLISECONDS,
-                                                                                )
-                                                                                .build(),
-                                                                        )
+                                                                    WidgetUpdateWorker.enqueueRefresh(
+                                                                        context,
+                                                                        intArrayOf(appWidgetId),
+                                                                    )
                                                                 } catch (e: Exception) {
                                                                     android.util.Log.e(
                                                                         "WidgetConfig",

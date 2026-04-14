@@ -43,8 +43,11 @@ internal object GlobalDataStore {
     private val mutex = Mutex()
     private var cached: GlobalData? = null
 
-    suspend fun getOrLoad(): ApiResult<GlobalData> =
+    suspend fun getOrLoad(forceRefresh: Boolean = false): ApiResult<GlobalData> =
         mutex.withLock {
+            if (forceRefresh) {
+                cached = null
+            }
             cached?.let { return ApiResult.Ok(it) }
             when (val r = client.fetchGlobalData()) {
                 is ApiResult.Ok -> {

@@ -86,17 +86,30 @@ public class MBTATripWidget : GlanceAppWidget() {
             return
         }
 
-        val globalResult = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }
+        val cfg = checkNotNull(config)
         val globalData =
-            when (globalResult) {
+            when (
+                val globalResult = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }
+            ) {
                 is ApiResult.Ok -> globalResult.data
                 is ApiResult.Error -> {
-                    provideContent { WidgetContent.ErrorState(context = context) }
-                    return
+                    when (
+                        val retry =
+                            withContext(Dispatchers.IO) {
+                                GlobalDataStore.getOrLoad(forceRefresh = true)
+                            }
+                    ) {
+                        is ApiResult.Ok -> retry.data
+                        is ApiResult.Error -> {
+                            provideContent {
+                                WidgetContent.LoadError(context = context, config = cfg)
+                            }
+                            return
+                        }
+                    }
                 }
             }
 
-        val cfg = config
         val result =
             withContext(Dispatchers.IO) {
                 widgetTripUseCase.getNextTrip(
@@ -108,7 +121,7 @@ public class MBTATripWidget : GlanceAppWidget() {
 
         when (result) {
             is ApiResult.Error -> {
-                provideContent { WidgetContent.ErrorState(context = context) }
+                provideContent { WidgetContent.LoadError(context = context, config = cfg) }
             }
             is ApiResult.Ok -> {
                 val tripData = result.data.trip
@@ -188,6 +201,39 @@ private object WidgetContent {
             ) {
                 Text(
                     text = context.getString(R.string.widget_unable_to_load),
+                    style = TextStyle(color = ColorProvider(deemphasizedColor)),
+                )
+            }
+        }
+    }
+
+    /** Shows the configured route when trip times or network data could not be loaded. */
+    @androidx.compose.runtime.Composable
+    fun LoadError(context: Context, config: WidgetTripConfig) {
+        val fromLabel = config.fromLabel.ifEmpty { context.getString(R.string.widget_from) }
+        val toLabel = config.toLabel.ifEmpty { context.getString(R.string.widget_to) }
+        val primaryColor =
+            Color(ContextCompat.getColor(context, R.color.key).toLong() and 0xFFFFFFFFL)
+        val deemphasizedColor =
+            Color(ContextCompat.getColor(context, R.color.deemphasized).toLong() and 0xFFFFFFFFL)
+        val bgColor = Color(ContextCompat.getColor(context, R.color.fill2).toLong() and 0xFFFFFFFFL)
+        GlanceTheme {
+            Column(
+                modifier =
+                    GlanceModifier.fillMaxWidth()
+                        .background(bgColor)
+                        .padding(16.dp)
+                        .clickable(actionStartActivity<MainActivity>()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "$fromLabel → $toLabel",
+                    style = TextStyle(color = ColorProvider(primaryColor)),
+                )
+                Spacer(modifier = GlanceModifier.height(8.dp))
+                Text(
+                    text = context.getString(R.string.widget_trip_times_error),
                     style = TextStyle(color = ColorProvider(deemphasizedColor)),
                 )
             }

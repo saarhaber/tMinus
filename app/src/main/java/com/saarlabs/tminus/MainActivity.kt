@@ -46,6 +46,7 @@ import com.saarlabs.tminus.ui.LastTrainEditorRoute
 import com.saarlabs.tminus.ui.LastTrainListScreen
 import com.saarlabs.tminus.ui.RoadmapScreen
 import com.saarlabs.tminus.ui.SettingsContent
+import com.saarlabs.tminus.android.widget.WidgetUpdateWorker
 
 public class MainActivity : ComponentActivity() {
 
@@ -196,6 +197,13 @@ private fun TminusApp(
                 )
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // When the user leaves the app (e.g. returns to the home screen), refresh trip widgets
+        // so they are not stuck on a loading or stale state.
+        WidgetUpdateWorker.enqueueRefresh(this, appWidgetIds = null)
     }
 }
 

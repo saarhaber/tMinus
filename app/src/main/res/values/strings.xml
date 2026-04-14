@@ -133,6 +133,7 @@
     <string name="widget_configure">Tap to configure</string>
     <string name="widget_set_from_to">Set your from and to stops</string>
     <string name="widget_unable_to_load">Unable to load</string>
+    <string name="widget_trip_times_error">Trip times unavailable. Open Tminus or check your connection.</string>
     <string name="widget_no_trips">No trips available</string>
     <string name="widget_in_minutes">in %1$d min</string>
     <string name="widget_track_short">Track %1$s</string>
