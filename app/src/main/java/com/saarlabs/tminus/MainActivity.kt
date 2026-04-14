@@ -109,6 +109,13 @@ public class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        // When the user leaves the app (e.g. returns to the home screen), refresh trip widgets
+        // so they are not stuck on a loading or stale state.
+        WidgetUpdateWorker.enqueueRefresh(this, appWidgetIds = null)
+    }
+
     public companion object {
         public const val ROUTE_MAIN_TABS: String = "main_tabs"
         public const val ROUTE_COMMUTE_LIST: String = "commute_list"
@@ -197,13 +204,6 @@ private fun TminusApp(
                 )
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // When the user leaves the app (e.g. returns to the home screen), refresh trip widgets
-        // so they are not stuck on a loading or stale state.
-        WidgetUpdateWorker.enqueueRefresh(this, appWidgetIds = null)
     }
 }
 

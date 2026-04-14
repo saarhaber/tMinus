@@ -56,7 +56,9 @@ import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
+import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
