@@ -1,6 +1,9 @@
 /.gradle/
 /build/
 /app/build/
+
+# APKs are distributed via GitHub Releases, not committed
+/releases/
 /local.properties
 *.iml
 .idea/
