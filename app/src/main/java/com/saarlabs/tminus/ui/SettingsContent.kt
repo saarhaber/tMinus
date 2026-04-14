@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,93 +14,105 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.saarlabs.tminus.R
+import kotlinx.coroutines.launch
+
 @Composable
 public fun SettingsContent(
     initialV3: String,
-    initialGtfs: String,
-    onSave: (v3: String, gtfs: String) -> Unit,
+    onSave: (v3: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var v3 by remember(initialV3) { mutableStateOf(initialV3) }
-    var gtfs by remember(initialGtfs) { mutableStateOf(initialGtfs) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val isDirty = v3 != initialV3
 
-    Column(
-        modifier =
-            modifier
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
-    ) {
-        Text(
-            text = "API keys",
-            style = MaterialTheme.typography.headlineSmall,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text =
-                "Tminus uses the MBTA V3 API for schedules and stops. " +
-                    "Optionally add keys from both MBTA developer sites below (recommended for higher rate limits). " +
-                    "The GTFS Realtime key is reserved for future widgets (alerts, live feeds).",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(Modifier.height(16.dp))
-
-        DocLink(
-            label = "V3 API portal — request a free key",
-            url = "https://api-v3.mbta.com/",
-        )
-        Spacer(Modifier.height(8.dp))
-        DocLink(
-            label = "V3 API reference (Swagger)",
-            url = "https://api-v3.mbta.com/docs/swagger/index.html",
-        )
-        Spacer(Modifier.height(8.dp))
-        DocLink(
-            label = "GTFS Realtime (MBTA developers)",
-            url = "https://www.mbta.com/developers/gtfs-realtime",
-        )
-        Spacer(Modifier.height(8.dp))
-        DocLink(
-            label = "GTFS Realtime feeds (cdn.mbta.com)",
-            url = "https://www.mbta.com/developers/gtfs-realtime",
-        )
-
-        Spacer(Modifier.height(20.dp))
-
-        OutlinedTextField(
-            value = v3,
-            onValueChange = { v3 = it },
-            label = { Text("V3 API key (optional)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = gtfs,
-            onValueChange = { gtfs = it },
-            label = { Text("GTFS Realtime / second key (optional, future use)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
-
-        Spacer(Modifier.height(24.dp))
-        Button(
-            onClick = { onSave(v3, gtfs) },
-            modifier = Modifier.fillMaxWidth(),
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { innerPadding ->
+        Column(
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
         ) {
-            Text("Save")
+            Text(
+                text = stringResource(R.string.settings_api_keys_title),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.settings_api_keys_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(16.dp))
+
+            DocLink(
+                label = stringResource(R.string.settings_link_v3_portal),
+                url = "https://api-v3.mbta.com/",
+            )
+            Spacer(Modifier.height(8.dp))
+            DocLink(
+                label = stringResource(R.string.settings_link_v3_swagger),
+                url = "https://api-v3.mbta.com/docs/swagger/index.html",
+            )
+
+            Spacer(Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = v3,
+                onValueChange = { v3 = it },
+                label = { Text(stringResource(R.string.settings_v3_key_label)) },
+                supportingText = {
+                    Text(
+                        text =
+                            when {
+                                isDirty -> stringResource(R.string.settings_v3_key_hint_unsaved)
+                                v3.isNotBlank() -> stringResource(R.string.settings_v3_key_hint_saved)
+                                else -> stringResource(R.string.settings_v3_key_hint_empty)
+                            },
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = {
+                    onSave(v3)
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            context.getString(R.string.settings_api_key_saved_snackbar),
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.settings_save_keys))
+            }
         }
     }
 }

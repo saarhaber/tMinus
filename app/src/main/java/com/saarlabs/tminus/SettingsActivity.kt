@@ -1,6 +1,7 @@
 package com.saarlabs.tminus
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,14 +21,17 @@ public class SettingsActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     SettingsContent(
                         initialV3 = prefs.getString(SettingsKeys.KEY_V3_API, "") ?: "",
-                        initialGtfs = prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: "",
-                        onSave = { v3, gtfs ->
+                        onSave = { v3 ->
                             prefs.edit()
                                 .putString(SettingsKeys.KEY_V3_API, v3.ifBlank { null })
-                                .putString(SettingsKeys.KEY_GTFS_RT, gtfs.ifBlank { null })
                                 .commit()
                             GlobalDataStore.invalidate()
                             TminusApplication.refreshNetworking()
+                            Toast.makeText(
+                                this@SettingsActivity,
+                                getString(R.string.settings_api_key_saved_snackbar),
+                                Toast.LENGTH_SHORT,
+                            ).show()
                             finish()
                         },
                     )

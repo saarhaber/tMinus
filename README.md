@@ -14,8 +14,7 @@ The in-app UI uses bottom navigation: **Home**, **Roadmap** (current and possibl
 
 The app works without keys for light use. For higher rate limits, request a free key from the V3 portal and paste it in **Settings** inside the app.
 
-- **V3 API (schedules, stops, routes):** [MBTA Developers — V3 API](https://www.mbta.com/developers/v3-api) and [V3 API Portal](https://api-v3.mbta.com/)
-- **GTFS Realtime (feeds for alerts / live data):** [GTFS Realtime — MBTA Developers](https://www.mbta.com/developers/gtfs-realtime) — a second field is stored for future widgets (notifications, alerts, etc.)
+- **V3 API (schedules, stops, routes):** [MBTA Developers — V3 API](https://www.mbta.com/developers/v3-api) and [V3 API Portal](https://api-v3.mbta.com/) — paste your key in **Settings** in the app.
 
 ## Build locally
 

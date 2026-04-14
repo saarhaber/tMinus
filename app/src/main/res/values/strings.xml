@@ -92,7 +92,18 @@
     <string name="roadmap_intro">Current capabilities and ideas for the future. Nothing here is a promise; it is a living list as the project grows.</string>
     <string name="roadmap_section_in_app">In the app today</string>
     <string name="roadmap_feature_trip_widget">Home screen trip widget (next trip between two stops)</string>
-    <string name="roadmap_feature_api_keys">Optional MBTA V3 and GTFS Realtime key fields</string>
+    <string name="roadmap_feature_api_keys">Optional MBTA V3 API key field</string>
+
+    <string name="settings_api_keys_title">API key</string>
+    <string name="settings_api_keys_body">Tminus uses the MBTA V3 API for schedules and stops. Optionally add a key from the developer portal below for higher rate limits.</string>
+    <string name="settings_link_v3_portal">V3 API portal — request a free key</string>
+    <string name="settings_link_v3_swagger">V3 API reference (Swagger)</string>
+    <string name="settings_v3_key_label">MBTA V3 API key (optional)</string>
+    <string name="settings_v3_key_hint_saved">Saved on this device. You can replace or clear it anytime.</string>
+    <string name="settings_v3_key_hint_unsaved">You have unsaved changes — tap Save to apply.</string>
+    <string name="settings_v3_key_hint_empty">No key saved. The app works without one; add a key if you hit rate limits.</string>
+    <string name="settings_save_keys">Save</string>
+    <string name="settings_api_key_saved_snackbar">API key saved</string>
     <string name="roadmap_feature_roadmap_screen">This roadmap screen</string>
     <string name="roadmap_feature_commutes">Multiple saved commutes with leave and arrival notifications (schedule-based)</string>
     <string name="roadmap_feature_last_first_train">Last / first train reminders (scheduled departures in a time window)</string>

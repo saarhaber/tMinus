@@ -64,22 +64,16 @@ public class MainActivity : ComponentActivity() {
                             var settingsV3 by remember {
                                 mutableStateOf(prefs.getString(SettingsKeys.KEY_V3_API, "") ?: "")
                             }
-                            var settingsGtfs by remember {
-                                mutableStateOf(prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: "")
-                            }
                             TminusApp(
                                 rootNavController = rootNav,
                                 initialV3 = settingsV3,
-                                initialGtfs = settingsGtfs,
-                                onSaveSettings = { v3, gtfs ->
+                                onSaveSettings = { v3 ->
                                     prefs.edit()
                                         .putString(SettingsKeys.KEY_V3_API, v3.ifBlank { null })
-                                        .putString(SettingsKeys.KEY_GTFS_RT, gtfs.ifBlank { null })
                                         .commit()
                                     GlobalDataStore.invalidate()
                                     TminusApplication.refreshNetworking()
                                     settingsV3 = prefs.getString(SettingsKeys.KEY_V3_API, "") ?: ""
-                                    settingsGtfs = prefs.getString(SettingsKeys.KEY_GTFS_RT, "") ?: ""
                                 },
                             )
                         }
@@ -141,8 +135,7 @@ private sealed class MainDestination(
 private fun TminusApp(
     rootNavController: NavHostController,
     initialV3: String,
-    initialGtfs: String,
-    onSaveSettings: (String, String) -> Unit,
+    onSaveSettings: (String) -> Unit,
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -195,7 +188,6 @@ private fun TminusApp(
             composable(MainDestination.Settings.route) {
                 SettingsContent(
                     initialV3 = initialV3,
-                    initialGtfs = initialGtfs,
                     onSave = onSaveSettings,
                 )
             }
