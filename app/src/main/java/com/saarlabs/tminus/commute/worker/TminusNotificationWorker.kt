@@ -362,7 +362,7 @@ public class TminusNotificationWorker(
         val custom = buildRemoteViews()
         val notif =
             NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_stat_tminus)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setCustomContentView(custom)

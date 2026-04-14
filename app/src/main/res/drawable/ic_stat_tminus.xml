@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- White-on-transparent for NotificationCompat small icon (status bar). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
+    android:width="24dp"
+    android:height="24dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#ED8B00"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M24,72 L54,24 L84,72 Z" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M42,58 L54,40 L66,58 Z" />
 </vector>
