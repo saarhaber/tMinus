@@ -5,8 +5,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import com.saarlabs.tminus.ui.SettingsContent
 
 /** Standalone entry for deep links or shortcuts; main flow uses the Settings tab in [MainActivity]. */
@@ -18,7 +21,10 @@ public class SettingsActivity : ComponentActivity() {
         val prefs = getSharedPreferences(SettingsKeys.PREFS, MODE_PRIVATE)
         setContent {
             MaterialTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize().safeDrawingPadding(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
                     SettingsContent(
                         initialV3 = prefs.getString(SettingsKeys.KEY_V3_API, "") ?: "",
                         onSave = { v3 ->

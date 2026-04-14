@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
@@ -54,7 +55,10 @@ public class MainActivity : ComponentActivity() {
         val prefs = getSharedPreferences(SettingsKeys.PREFS, MODE_PRIVATE)
         setContent {
             MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize().safeDrawingPadding(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
                     val rootNav = rememberNavController()
                     NavHost(
                         navController = rootNav,

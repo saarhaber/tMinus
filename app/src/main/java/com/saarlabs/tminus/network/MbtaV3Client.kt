@@ -254,8 +254,9 @@ public class MbtaV3Client(private val apiKey: String?) {
             val arrStr =
                 attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
                     ?: attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
-            val dep = depStr?.let { EasternTimeInstant(Instant.parse(it)) }
-            val arr = arrStr?.let { EasternTimeInstant(Instant.parse(it)) }
+            val dep = parseMbtaScheduleInstant(depStr)
+            val arr = parseMbtaScheduleInstant(arrStr)
+            if (dep == null && arr == null) continue
             val stopId = sObj.jsonApiRelationshipDataId("stop") ?: continue
             val seq = attrs["stop_sequence"]?.asJsonPrimitiveOrNull()?.intOrNull ?: continue
             val headsign = attrs["stop_headsign"]?.asJsonPrimitiveOrNull()?.content
@@ -348,7 +349,7 @@ public class MbtaV3Client(private val apiKey: String?) {
                         attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: continue
-                    val et = EasternTimeInstant(Instant.parse(depStr))
+                    val et = parseMbtaScheduleInstant(depStr) ?: continue
                     if (latest == null || et > latest) latest = et
                 }
                 ApiResult.Ok(DepartureLookupResult(latest))
@@ -388,7 +389,7 @@ public class MbtaV3Client(private val apiKey: String?) {
                         attrs["departure_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: attrs["arrival_time"]?.asJsonPrimitiveOrNull()?.content
                             ?: continue
-                    val et = EasternTimeInstant(Instant.parse(depStr))
+                    val et = parseMbtaScheduleInstant(depStr) ?: continue
                     if (earliest == null || et < earliest) earliest = et
                 }
                 ApiResult.Ok(DepartureLookupResult(earliest))
@@ -508,6 +509,20 @@ public class MbtaV3Client(private val apiKey: String?) {
             childStopIds = childIds,
             parentStationId = parentId,
         )
+    }
+
+    /**
+     * MBTA schedule attributes are sometimes the literal string `"null"` or otherwise unparsable;
+     * [Instant.parse] then throws ("Failed to parse an instant from 'null'").
+     */
+    private fun parseMbtaScheduleInstant(raw: String?): EasternTimeInstant? {
+        val s = raw?.trim() ?: return null
+        if (s.isEmpty() || s.equals("null", ignoreCase = true)) return null
+        return try {
+            EasternTimeInstant(Instant.parse(s))
+        } catch (_: Throwable) {
+            null
+        }
     }
 
     private fun describeMbtaRequestFailure(e: Throwable): String {
