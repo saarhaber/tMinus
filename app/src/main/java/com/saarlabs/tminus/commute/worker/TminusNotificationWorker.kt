@@ -373,7 +373,8 @@ public class TminusNotificationWorker(
         public const val UNIQUE_NAME: String = "TminusNotifications"
         private const val PREFS_STATE = "tminus_notif_state"
         private const val CHANNEL_ID = "commute"
-        private const val WINDOW_MS = 60_000L * 20
+        /** Wide enough for 15-minute periodic checks plus clock skew (commute / last-train lead times). */
+        private const val WINDOW_MS = 60_000L * 45
         private const val ARRIVAL_WINDOW_MS = 60_000L * 15
     }
 }

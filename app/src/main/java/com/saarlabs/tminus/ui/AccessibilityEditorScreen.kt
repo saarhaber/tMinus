@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -24,14 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.saarlabs.tminus.model.Route
 import com.saarlabs.tminus.model.Stop
 import com.saarlabs.tminus.model.response.ApiResult
+import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.features.AccessibilityWatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun AccessibilityEditorScreen(
     initial: AccessibilityWatch?,
@@ -43,17 +50,24 @@ public fun AccessibilityEditorScreen(
     var stop by remember { mutableStateOf<Stop?>(null) }
     var enabled by remember { mutableStateOf(initial?.enabled ?: true) }
     var showStopDialog by remember { mutableStateOf(false) }
+    var globalData by remember { mutableStateOf<GlobalData?>(null) }
+    var routeMenuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (initial != null) {
-            when (val r = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }) {
-                is ApiResult.Ok -> {
+        when (val r = withContext(Dispatchers.IO) { GlobalDataStore.getOrLoad() }) {
+            is ApiResult.Ok -> {
+                globalData = r.data
+                if (initial != null) {
                     stop = r.data.getStop(initial.stopId)?.resolveParent(r.data.stops)
                 }
-                is ApiResult.Error -> {}
             }
+            is ApiResult.Error -> {}
         }
     }
+
+    val routeList: List<Route> =
+        remember(globalData) { globalData?.let { routesForDropdown(it.routes) } ?: emptyList() }
+    val selectedRoute: Route? = routeList.find { it.id == routeId }
 
     Column(
         modifier =
@@ -69,13 +83,52 @@ public fun AccessibilityEditorScreen(
             label = { Text(stringResource(R.string.access_name)) },
             modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
-            value = routeId,
-            onValueChange = { routeId = it },
-            label = { Text(stringResource(R.string.access_route)) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-        )
+        if (routeList.isNotEmpty()) {
+            ExposedDropdownMenuBox(
+                expanded = routeMenuExpanded,
+                onExpandedChange = { routeMenuExpanded = !routeMenuExpanded },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                OutlinedTextField(
+                    value = selectedRoute?.label ?: routeId,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.access_route)) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = routeMenuExpanded) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    singleLine = true,
+                )
+                ExposedDropdownMenu(
+                    expanded = routeMenuExpanded,
+                    onDismissRequest = { routeMenuExpanded = false },
+                ) {
+                    routeList.forEach { r ->
+                        DropdownMenuItem(
+                            text = { Text("${r.label} (${r.id})") },
+                            onClick = {
+                                routeId = r.id
+                                routeMenuExpanded = false
+                            },
+                        )
+                    }
+                }
+            }
+            if (selectedRoute == null) {
+                Text(
+                    stringResource(R.string.last_train_route_unknown, routeId),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        } else {
+            OutlinedTextField(
+                value = routeId,
+                onValueChange = { routeId = it },
+                label = { Text(stringResource(R.string.access_route)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
         Button(onClick = { showStopDialog = true }, modifier = Modifier.fillMaxWidth()) {
             Text(
                 stringResource(
@@ -106,7 +159,11 @@ public fun AccessibilityEditorScreen(
                     ),
                 )
             },
-            enabled = name.isNotBlank() && stop != null && routeId.isNotBlank(),
+            enabled =
+                name.isNotBlank() &&
+                    stop != null &&
+                    routeId.isNotBlank() &&
+                    (routeList.isEmpty() || selectedRoute != null),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.commute_save))

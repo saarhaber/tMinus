@@ -103,79 +103,189 @@ public class MbtaV3Client(private val apiKey: String?) {
         }
 
     /**
+     * Routes that serve [stopId] (for pickers and fallbacks).
+     */
+    public suspend fun fetchRoutesForStop(stopId: String): ApiResult<List<Route>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val out = linkedMapOf<String, Route>()
+                paginateJsonApi(
+                    path = "routes",
+                    pageLimit = 100,
+                    configure = {
+                        parameter("filter[stop]", stopId)
+                    },
+                ) { doc ->
+                    for (el in doc.dataArrayElements()) {
+                        val o = el.asJsonObjectOrNull() ?: continue
+                        if (o["type"]?.asJsonPrimitiveOrNull()?.content != "route") continue
+                        val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
+                        parseRoute(o)?.let { out[id] = it }
+                    }
+                }
+                ApiResult.Ok(out.values.sorted())
+            } catch (e: Throwable) {
+                ApiResult.Error(message = describeMbtaRequestFailure(e))
+            }
+        }
+
+    /**
+     * Parent stations on [routeId] (merged into [stops] for any stops missing from cache).
+     */
+    private suspend fun fetchParentStopsForRoute(
+        routeId: String,
+        stops: MutableMap<String, Stop>,
+    ): List<Stop> {
+        val fromResponse = mutableListOf<Stop>()
+        paginateJsonApi(
+            path = "stops",
+            pageLimit = 500,
+            configure = {
+                parameter("filter[route]", routeId)
+            },
+        ) { doc ->
+            mergeIncludedStops(doc, stops)
+            for (el in doc.dataArrayElements()) {
+                val o = el.asJsonObjectOrNull() ?: continue
+                if (o["type"]?.asJsonPrimitiveOrNull()?.content != "stop") continue
+                val id = o["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
+                val parsed = parseStopFromResource(o)?.also { stops[id] = it } ?: continue
+                if (parsed.parentStationId != null) continue
+                if (parsed.locationType != LocationType.STATION && parsed.locationType != LocationType.STOP) {
+                    continue
+                }
+                fromResponse.add(parsed)
+            }
+        }
+        return fromResponse.sortedBy { it.name }
+    }
+
+    /**
+     * When route-pattern reachability is empty (e.g. some commuter-rail patterns), fall back to
+     * “other stations on the same route(s)” so pairs like Natick Center → Back Bay still work.
+     */
+    private suspend fun fetchReachableDestinationsViaSharedRoutes(
+        fromStopId: String,
+        allStops: Map<String, Stop>,
+    ): List<Stop> {
+        val routesResult = fetchRoutesForStop(fromStopId)
+        val routeIds =
+            when (routesResult) {
+                is ApiResult.Ok -> routesResult.data.map { it.id }
+                is ApiResult.Error -> return emptyList()
+            }
+        if (routeIds.isEmpty()) return emptyList()
+
+        val mutableStops = allStops.toMutableMap()
+        val parents = mutableSetOf<String>()
+        val fromParent = allStops[fromStopId]?.resolveParent(allStops)?.id ?: fromStopId
+
+        for (rid in routeIds) {
+            for (s in fetchParentStopsForRoute(rid, mutableStops)) {
+                val p = s.resolveParent(mutableStops).id
+                if (p != fromParent) parents.add(p)
+            }
+        }
+
+        return parents
+            .mapNotNull { mutableStops[it] ?: allStops[it] }
+            .map { it.resolveParent(mutableStops) }
+            .distinctBy { it.id }
+            .sortedBy { it.name }
+    }
+
+    /**
      * Parent stations/stops reachable from [fromStopId] without transfers, using route patterns
-     * through that stop (same idea as PR #1593).
+     * through that stop (same idea as PR #1593). If that yields no destinations, falls back to
+     * stations on the same route(s) as the origin.
      */
     public suspend fun fetchReachableDestinationStops(
         fromStopId: String,
         allStops: Map<String, Stop>,
     ): ApiResult<List<Stop>> =
         withContext(Dispatchers.IO) {
-            try {
-                val reachable = mutableSetOf<String>()
-                paginateJsonApi(
-                    path = "route_patterns",
-                    pageLimit = 50,
-                    configure = {
-                        parameter("filter[stop]", fromStopId)
-                    },
-                ) { doc ->
-                    for (el in doc.dataArrayElements()) {
-                        val patternObj = el.asJsonObjectOrNull() ?: continue
-                        val patternId = patternObj["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
-                        val repTripId =
-                            patternObj.jsonApiRelationshipDataId("representative_trip")
-                        val tripId =
-                            resolveSampleTripId(patternId, repTripId) ?: continue
+            val primaryResult =
+                try {
+                    val reachable = mutableSetOf<String>()
+                    paginateJsonApi(
+                        path = "route_patterns",
+                        pageLimit = 50,
+                        configure = {
+                            parameter("filter[stop]", fromStopId)
+                        },
+                    ) { doc ->
+                        for (el in doc.dataArrayElements()) {
+                            val patternObj = el.asJsonObjectOrNull() ?: continue
+                            val patternId = patternObj["id"]?.asJsonPrimitiveOrNull()?.content ?: continue
+                            val repTripId =
+                                patternObj.jsonApiRelationshipDataId("representative_trip")
+                            val tripId =
+                                resolveSampleTripId(patternId, repTripId) ?: continue
 
-                        val schedDoc =
-                            httpClient
-                                .get("schedules") {
-                                    parameter("filter[trip]", tripId)
-                                    parameter("include", "stop")
-                                    parameter("page[limit]", "200")
+                            val schedDoc =
+                                httpClient
+                                    .get("schedules") {
+                                        parameter("filter[trip]", tripId)
+                                        parameter("include", "stop")
+                                        parameter("page[limit]", "200")
+                                    }
+                                    .body<JsonObject>()
+
+                            mergeIncludedStops(schedDoc, allStops.toMutableMap())
+
+                            val schedData = schedDoc.get("data")?.asJsonArrayOrNull() ?: continue
+                            val orderedStopIds =
+                                schedData
+                                    .mapNotNull { it.asJsonObjectOrNull() }
+                                    .sortedBy {
+                                        it["attributes"]
+                                            ?.asJsonObjectOrNull()
+                                            ?.get("stop_sequence")
+                                            ?.asJsonPrimitiveOrNull()
+                                            ?.intOrNull ?: 0
+                                    }
+                                    .mapNotNull { sObj ->
+                                        sObj.jsonApiRelationshipDataId("stop")
+                                    }
+
+                            val fromIdx =
+                                orderedStopIds.indexOfFirst { sid ->
+                                    Stop.equalOrFamily(sid, fromStopId, allStops)
                                 }
-                                .body<JsonObject>()
-
-                        mergeIncludedStops(schedDoc, allStops.toMutableMap())
-
-                        val schedData = schedDoc.get("data")?.asJsonArrayOrNull() ?: continue
-                        val orderedStopIds =
-                            schedData
-                                .mapNotNull { it.asJsonObjectOrNull() }
-                                .sortedBy {
-                                    it["attributes"]
-                                        ?.asJsonObjectOrNull()
-                                        ?.get("stop_sequence")
-                                        ?.asJsonPrimitiveOrNull()
-                                        ?.intOrNull ?: 0
-                                }
-                                .mapNotNull { sObj ->
-                                    sObj.jsonApiRelationshipDataId("stop")
-                                }
-
-                        val fromIdx =
-                            orderedStopIds.indexOfFirst { sid ->
-                                Stop.equalOrFamily(sid, fromStopId, allStops)
+                            if (fromIdx < 0 || fromIdx >= orderedStopIds.lastIndex) continue
+                            for (i in (fromIdx + 1) until orderedStopIds.size) {
+                                val sid = orderedStopIds[i]
+                                val raw = allStops[sid] ?: continue
+                                val parent = raw.resolveParent(allStops)
+                                reachable.add(parent.id)
                             }
-                        if (fromIdx < 0 || fromIdx >= orderedStopIds.lastIndex) continue
-                        for (i in (fromIdx + 1) until orderedStopIds.size) {
-                            val sid = orderedStopIds[i]
-                            val raw = allStops[sid] ?: continue
-                            val parent = raw.resolveParent(allStops)
-                            reachable.add(parent.id)
                         }
                     }
+
+                    ApiResult.Ok(
+                        reachable
+                            .mapNotNull { allStops[it] }
+                            .filter { it.parentStationId == null }
+                            .sortedBy { it.name },
+                    )
+                } catch (e: Throwable) {
+                    ApiResult.Error(message = describeMbtaRequestFailure(e))
                 }
 
-                ApiResult.Ok(
-                    reachable
-                        .mapNotNull { allStops[it] }
-                        .filter { it.parentStationId == null }
-                        .sortedBy { it.name },
-                )
-            } catch (e: Throwable) {
-                ApiResult.Error(message = describeMbtaRequestFailure(e))
+            val primaryList =
+                when (primaryResult) {
+                    is ApiResult.Ok -> primaryResult.data
+                    is ApiResult.Error -> emptyList()
+                }
+            if (primaryList.isNotEmpty()) return@withContext primaryResult
+
+            val fallback = fetchReachableDestinationsViaSharedRoutes(fromStopId, allStops)
+            if (fallback.isNotEmpty()) {
+                return@withContext ApiResult.Ok(fallback)
+            }
+            when (primaryResult) {
+                is ApiResult.Error -> primaryResult
+                is ApiResult.Ok -> ApiResult.Ok(emptyList())
             }
         }
 
