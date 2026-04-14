@@ -1,6 +1,5 @@
 package com.saarlabs.tminus.android.widget
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
@@ -426,7 +425,6 @@ private fun WidgetConfigScreen(
                                                                         context,
                                                                         intArrayOf(appWidgetId),
                                                                     )
-                                                                    (context as Activity).moveTaskToBack(true)
                                                                     onComplete()
                                                                 } catch (e: Exception) {
                                                                     android.util.Log.e(
