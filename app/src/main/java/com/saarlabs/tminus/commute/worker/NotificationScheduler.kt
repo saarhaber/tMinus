@@ -2,6 +2,7 @@ package com.saarlabs.tminus.commute.worker
 
 import android.content.Context
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 
 /**
@@ -10,7 +11,10 @@ import androidx.work.WorkManager
  */
 internal object NotificationScheduler {
     fun enqueueImmediateRun(context: Context) {
-        val work = OneTimeWorkRequestBuilder<TminusNotificationWorker>().build()
+        val work =
+            OneTimeWorkRequestBuilder<TminusNotificationWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
         WorkManager.getInstance(context.applicationContext).enqueue(work)
     }
 }
