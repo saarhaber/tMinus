@@ -6,6 +6,61 @@ Open-source Android widgets and tools for MBTA riders. Application ID: **`com.sa
 
 The in-app UI uses bottom navigation: **Home** and **Settings** (API keys, time format, documentation links, and community / contribution links).
 
+## Screenshots
+
+Home screen **widgets** show trip countdowns or departures at a stop; the **app** covers commutes, first/last train alerts, and station accessibility watches.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/readme-widget-trip.png" width="280" alt="MBTA trip home screen widget showing line, route, countdown, and times" />
+      <br />
+      <sub><strong>Trip widget</strong> — line, next trip, and schedule at a glance</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/readme-widget-station-board.png" width="280" alt="Station board widget showing scheduled departures from a stop" />
+      <br />
+      <sub><strong>Station board widget</strong> — upcoming departures for a stop</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/readme-home.png" width="280" alt="tMinus Home screen with commutes, train alerts, and elevator alerts" />
+      <br />
+      <sub><strong>Home</strong> — entry points for commutes and alerts</sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/readme-choose-stops.png" width="280" alt="Choose stops screen with from and to fields" />
+      <br />
+      <sub><strong>Choose stops</strong> — pick origin and destination for the widget</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/readme-commutes-list.png" width="280" alt="Commutes list with one commute card" />
+      <br />
+      <sub><strong>Commutes</strong> — reorder, edit, or add scheduled routes</sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/readme-commute-editor.png" width="280" alt="Commute editor with days, target time, and notification options" />
+      <br />
+      <sub><strong>Commute editor</strong> — target time, window, and notifications</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/readme-last-first-list.png" width="280" alt="Last and first train alerts list" />
+      <br />
+      <sub><strong>Last / first train</strong> — manage schedule-based train alerts</sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/readme-train-time-alert.png" width="280" alt="Train time alert editor with route, direction, and window" />
+      <br />
+      <sub><strong>Train time alert</strong> — route, direction, window, and lead time</sub>
+    </td>
+  </tr>
+</table>
+
 **Commutes** (from Home): save **multiple** named routes (from/to stops), **days of week**, a **target time**, and a **window** (minutes before/after) used to query schedules. Set **notify X minutes before departure** for a “time to leave” notification, and optionally a second ping around **scheduled arrival**. Checks run on a background schedule (about every 15 minutes) using **schedule data** from the MBTA V3 API—not live predictions. Grant **notification permission** on Android 13+ when prompted.
 
 **Last / first train** alerts: pick **route id**, **direction id** (0 or 1), **stop**, **last vs first** mode, optional **time windows** (as minutes-from-midnight), and **notify N minutes before** that scheduled departure. Uses the latest/earliest departure in the window from the schedule API.
