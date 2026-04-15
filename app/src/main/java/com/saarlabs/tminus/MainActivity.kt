@@ -47,6 +47,7 @@ import com.saarlabs.tminus.ui.CommuteEditorRoute
 import com.saarlabs.tminus.ui.CommuteListScreen
 import com.saarlabs.tminus.ui.LastTrainEditorRoute
 import com.saarlabs.tminus.ui.LastTrainListScreen
+import com.saarlabs.tminus.ui.NotificationPermissionGate
 import com.saarlabs.tminus.ui.SettingsContent
 import com.saarlabs.tminus.android.widget.WidgetUpdateWorker
 
@@ -63,6 +64,7 @@ public class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    NotificationPermissionGate()
                     val rootNav = rememberNavController()
                     NavHost(
                         navController = rootNav,

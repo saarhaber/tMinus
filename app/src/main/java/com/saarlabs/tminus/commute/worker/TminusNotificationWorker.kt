@@ -43,8 +43,11 @@ public class TminusNotificationWorker(
 
     override suspend fun doWork(): Result =
         withContext(Dispatchers.IO) {
+            // Process start can run WorkManager before [TminusApplication.refreshNetworking] assigns [GlobalDataStore.client].
+            GlobalDataStore.awaitClientReady(timeoutMs = 15_000L)
             if (!GlobalDataStore.isClientReady()) {
-                return@withContext Result.success()
+                // Retry so we evaluate alerts after the app finishes initializing (not a permanent skip).
+                return@withContext Result.retry()
             }
             val prefs = applicationContext.getSharedPreferences(PREFS_STATE, Context.MODE_PRIVATE)
 
@@ -390,8 +393,10 @@ public class TminusNotificationWorker(
                 NotificationChannel(
                     CHANNEL_ID,
                     context.getString(R.string.notif_channel_commute),
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                ),
+                    NotificationManager.IMPORTANCE_HIGH,
+                ).apply {
+                    setShowBadge(true)
+                },
             )
         }
     }
@@ -399,7 +404,8 @@ public class TminusNotificationWorker(
     public companion object {
         public const val UNIQUE_NAME: String = "TminusNotifications"
         private const val PREFS_STATE = "tminus_notif_state"
-        private const val CHANNEL_ID = "commute"
+        /** Bumped so existing installs pick up [NotificationManager.IMPORTANCE_HIGH] without stale channel settings. */
+        private const val CHANNEL_ID = "commute_v2"
         /** Wide enough for 15-minute periodic checks plus clock skew (commute / last-train lead times). */
         private const val WINDOW_MS = 60_000L * 45
         private const val ARRIVAL_WINDOW_MS = 60_000L * 15

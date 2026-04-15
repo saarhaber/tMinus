@@ -1,9 +1,5 @@
 package com.saarlabs.tminus.ui
 
-import android.Manifest
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,17 +65,8 @@ public fun CommuteListScreen(
     val scope = rememberCoroutineScope()
     val use24Hour = rememberUse24HourTime()
 
-    val permissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
     LaunchedEffect(Unit) {
         profiles = repo.loadProfiles()
-    }
-
-    LaunchedEffect(profiles) {
-        if (profiles.any { it.enabled } && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
