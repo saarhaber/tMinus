@@ -229,6 +229,7 @@ public class TminusNotificationWorker(
                             LastTrainMode.FIRST ->
                                 applicationContext.getString(R.string.notif_first_train_title)
                         }
+                    val route = global.getRoute(p.routeId)
                     notify(
                         id = key.hashCode(),
                         title = modeLabel,
@@ -239,6 +240,8 @@ public class TminusNotificationWorker(
                                 label,
                                 dep.local.toString().take(16),
                             ),
+                        backgroundArgb = argbFromHexOrNull(route?.color.orEmpty()),
+                        contentArgb = argbFromHexOrNull(route?.textColor.orEmpty()),
                     )
                 }
             }
@@ -294,6 +297,7 @@ public class TminusNotificationWorker(
                 if (prefs.getBoolean(key, false)) continue
                 prefs.edit().putBoolean(key, true).apply()
 
+                val route = global.getRoute(w.routeId)
                 notify(
                     id = key.hashCode(),
                     title = applicationContext.getString(R.string.notif_accessibility_title),
@@ -303,6 +307,8 @@ public class TminusNotificationWorker(
                             w.name,
                             alert.header,
                         ),
+                    backgroundArgb = argbFromHexOrNull(route?.color.orEmpty()),
+                    contentArgb = argbFromHexOrNull(route?.textColor.orEmpty()),
                 )
             }
         }
