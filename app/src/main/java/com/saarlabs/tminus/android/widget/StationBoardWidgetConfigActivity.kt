@@ -66,7 +66,9 @@ import com.saarlabs.tminus.model.WidgetStationBoardConfig
 import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.sortStopsWithFavoritesFirst
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -272,9 +274,12 @@ private fun StationBoardWidgetConfigScreen(
                                         withContext(Dispatchers.IO) {
                                             widgetPreferences.setStationBoardConfig(appWidgetId, config)
                                         }
-                                        updateStationBoardWidgetWithRetry(context.applicationContext, appWidgetId)
-                                        WidgetUpdateWorker.enqueueRefresh(context, intArrayOf(appWidgetId))
+                                        val appContext = context.applicationContext
                                         onComplete()
+                                        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                                            updateStationBoardWidgetWithRetry(appContext, appWidgetId)
+                                            WidgetUpdateWorker.enqueueRefresh(appContext, intArrayOf(appWidgetId))
+                                        }
                                     } catch (e: Exception) {
                                         android.util.Log.e("StationBoardWidgetConfig", "save failed", e)
                                         Toast.makeText(
