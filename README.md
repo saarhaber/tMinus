@@ -12,6 +12,10 @@ The in-app UI uses bottom navigation: **Home** and **Settings** (API keys, time 
 
 **Elevator & station alerts**: watch a **route** + **station**; the app pulls **active alerts** for that route and notifies when an alert’s text plausibly matches your station (elevator/escalator/stop-closure effects). This is **heuristic**—not a guarantee every outage is detected.
 
+## App Screenshot
+
+<img src="screenshots/app-screenshot.jpg" alt="tMinus app screenshot showing trip information and station departures" width="350" />
+
 ## API keys (optional but recommended)
 
 The app works without keys for light use. For higher rate limits, request a free key from the V3 portal and paste it in **Settings** inside the app.
