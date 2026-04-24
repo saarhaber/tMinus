@@ -12,4 +12,12 @@ internal object SettingsKeys {
     const val THEME_DARK = "dark"
     /** Parent stop ids the user starred; used to pin stations to the top of stop lists. */
     const val KEY_FAVORITE_STOP_IDS = "favorite_stop_ids"
+    /**
+     * Text scale multiplier (stored as Int percent, 80..160) applied across the app and home-screen
+     * widgets. Defaults to 100 (= 1.0x).
+     */
+    const val KEY_FONT_SCALE_PERCENT = "font_scale_percent"
+    const val FONT_SCALE_DEFAULT_PERCENT = 100
+    const val FONT_SCALE_MIN_PERCENT = 80
+    const val FONT_SCALE_MAX_PERCENT = 160
 }

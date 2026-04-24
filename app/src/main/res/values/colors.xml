@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Matches Compose light [TminusTheme] background (avoid default purple-tint window flash). -->
-    <color name="window_background">#FFFAFCFF</color>
+    <color name="window_background">#FFF6F9FE</color>
     <!-- Adaptive launcher icon background (matches 1024×1024 brand PNG canvas) -->
     <color name="ic_launcher_background">#0B1426</color>
     <color name="key">#FF1C1C1E</color>
@@ -9,4 +9,13 @@
     <color name="text">#FF1C1C1E</color>
     <color name="fill2">#FFF2F2F7</color>
     <color name="fill3">#FFE5E5EA</color>
+
+    <!-- Widget palette (modernized, high contrast). -->
+    <color name="widget_surface">#FFFFFFFF</color>
+    <color name="widget_row_bg">#FFF0F4FB</color>
+    <color name="widget_header">#FF1F54A8</color>
+    <color name="widget_on_header">#FFFFFFFF</color>
+    <color name="widget_on_surface">#FF14181F</color>
+    <color name="widget_on_surface_variant">#FF4A4F5A</color>
+    <color name="widget_accent">#FF1F54A8</color>
 </resources>

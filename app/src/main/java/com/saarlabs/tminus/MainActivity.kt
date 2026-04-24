@@ -5,17 +5,33 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Accessible
+import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -23,6 +39,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.saarlabs.tminus.ui.theme.TminusTheme
 import com.saarlabs.tminus.ui.theme.rememberUserDarkTheme
 import androidx.compose.runtime.Composable
@@ -232,37 +251,199 @@ private fun HomeTab(
     onOpenLastTrain: () -> Unit,
     onOpenAccessibility: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        HomeHeader()
+        Spacer(Modifier.height(24.dp))
+
+        FeatureCard(
+            title = stringResource(R.string.home_commutes_button),
+            subtitle = stringResource(R.string.home_feature_commutes_desc),
+            icon = Icons.Filled.DirectionsTransit,
+            gradient =
+                Brush.linearGradient(
+                    listOf(
+                        scheme.primary,
+                        scheme.primaryContainer,
+                    ),
+                ),
+            iconTint = scheme.onPrimary,
+            titleColor = scheme.onPrimary,
+            subtitleColor = scheme.onPrimary.copy(alpha = 0.85f),
+            onClick = onOpenCommutes,
+        )
+        Spacer(Modifier.height(12.dp))
+        FeatureCard(
+            title = stringResource(R.string.home_last_train_button),
+            subtitle = stringResource(R.string.home_feature_last_train_desc),
+            icon = Icons.Filled.NightsStay,
+            gradient =
+                Brush.linearGradient(
+                    listOf(
+                        scheme.tertiary,
+                        scheme.tertiaryContainer,
+                    ),
+                ),
+            iconTint = scheme.onTertiary,
+            titleColor = scheme.onTertiary,
+            subtitleColor = scheme.onTertiary.copy(alpha = 0.85f),
+            onClick = onOpenLastTrain,
+        )
+        Spacer(Modifier.height(12.dp))
+        FeatureCard(
+            title = stringResource(R.string.home_access_button),
+            subtitle = stringResource(R.string.home_feature_access_desc),
+            icon = Icons.Filled.Accessible,
+            gradient =
+                Brush.linearGradient(
+                    listOf(
+                        scheme.secondary,
+                        scheme.secondaryContainer,
+                    ),
+                ),
+            iconTint = scheme.onSecondary,
+            titleColor = scheme.onSecondary,
+            subtitleColor = scheme.onSecondary.copy(alpha = 0.85f),
+            onClick = onOpenAccessibility,
+        )
+
+        Spacer(Modifier.height(24.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = scheme.surfaceContainerLow),
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    text = stringResource(R.string.home_tip_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = scheme.primary,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.home_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = scheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.home_hint_tabs),
+            style = MaterialTheme.typography.bodySmall,
+            color = scheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun HomeHeader() {
+    val scheme = MaterialTheme.colorScheme
+    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Box(
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(listOf(scheme.primary, scheme.tertiary)),
+                    ),
+            contentAlignment = androidx.compose.ui.Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.DirectionsTransit,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(26.dp),
+            )
+        }
+        Spacer(Modifier.width(12.dp))
         Column {
             Text(
                 text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.headlineMedium,
+                color = scheme.onSurface,
             )
-            Spacer(Modifier.height(12.dp))
             Text(
-                text = stringResource(R.string.home_body),
+                text = stringResource(R.string.home_tagline),
                 style = MaterialTheme.typography.bodyMedium,
+                color = scheme.onSurfaceVariant,
             )
         }
-        Spacer(Modifier.weight(1f))
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = onOpenCommutes, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.home_commutes_button))
-            }
-            Spacer(Modifier.height(8.dp))
-            FilledTonalButton(onClick = onOpenLastTrain, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.home_last_train_button))
-            }
-            Spacer(Modifier.height(8.dp))
-            FilledTonalButton(onClick = onOpenAccessibility, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.home_access_button))
+    }
+}
+
+@Composable
+private fun FeatureCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    gradient: Brush,
+    iconTint: Color,
+    titleColor: Color,
+    subtitleColor: Color,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(gradient)
+                    .padding(PaddingValues(horizontal = 18.dp, vertical = 18.dp)),
+        ) {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.20f)),
+                    contentAlignment = androidx.compose.ui.Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = titleColor,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = subtitleColor,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = iconTint,
+                )
             }
         }
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = stringResource(R.string.home_hint_tabs),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }

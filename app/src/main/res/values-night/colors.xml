@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Matches Compose dark [TminusTheme] background. -->
-    <color name="window_background">#FF121820</color>
+    <color name="window_background">#FF0F1620</color>
+
+    <!-- Widget palette (dark). -->
+    <color name="widget_surface">#FF1A222E</color>
+    <color name="widget_row_bg">#FF232D3C</color>
+    <color name="widget_header">#FF0F4594</color>
+    <color name="widget_on_header">#FFE6EEFB</color>
+    <color name="widget_on_surface">#FFE2E6EE</color>
+    <color name="widget_on_surface_variant">#FFB1B7C2</color>
+    <color name="widget_accent">#FFADC6FF</color>
 </resources>
