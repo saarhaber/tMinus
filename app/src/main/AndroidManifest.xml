@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Live-update widget mode: exact alarms drive the 60 s refresh cadence. User-revocable on API 31+. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".TminusApplication"
@@ -75,5 +77,9 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/mbta_station_board_widget_info" />
         </receiver>
+
+        <receiver
+            android:name="com.saarlabs.tminus.android.widget.WidgetTickReceiver"
+            android:exported="false" />
     </application>
 </manifest>
