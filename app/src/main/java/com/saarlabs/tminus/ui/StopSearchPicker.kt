@@ -74,12 +74,6 @@ public fun StopSearchPicker(
                     stringResource(R.string.widget_loading_timeout_tminus),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                Text(
-                    loadError!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
             }
         } else {
             CircularProgressIndicator(modifier = modifier.padding(24.dp))

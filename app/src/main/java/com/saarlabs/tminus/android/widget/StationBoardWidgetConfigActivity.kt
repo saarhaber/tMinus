@@ -321,11 +321,6 @@ private fun StationBoardWidgetConfigScreen(
                                         text = stringResource(R.string.widget_loading_timeout_tminus),
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
-                                    Text(
-                                        text = loadError!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
                                 }
                             }
                         }
@@ -443,7 +438,7 @@ private fun RouteFilterSection(
         }
         if (routesError != null) {
             Text(
-                text = routesError,
+                text = stringResource(R.string.widget_unable_to_load),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp),

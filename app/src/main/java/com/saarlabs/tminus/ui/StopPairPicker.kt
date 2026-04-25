@@ -248,12 +248,6 @@ public fun StopPairPicker(
                 globalResponse == null && loadError != null -> {
                     Column {
                         Text(stringResource(R.string.widget_loading_timeout_tminus))
-                        Text(
-                            loadError!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
                     }
                 }
                 globalResponse == null && loadingTimeout -> {
@@ -300,10 +294,7 @@ public fun StopPairPicker(
                         }
                         if (fromStop != null && reachableLoadError != null) {
                             Text(
-                                stringResource(
-                                    R.string.widget_destinations_unavailable,
-                                    reachableLoadError!!,
-                                ),
+                                stringResource(R.string.widget_destinations_unavailable),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 6.dp),

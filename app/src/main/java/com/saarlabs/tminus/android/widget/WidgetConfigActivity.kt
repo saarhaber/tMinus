@@ -323,11 +323,6 @@ private fun WidgetConfigScreen(
                                         text = stringResource(R.string.widget_loading_timeout_tminus),
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
-                                    Text(
-                                        text = loadError!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
                                 }
                             }
                         }
@@ -391,11 +386,7 @@ private fun WidgetConfigScreen(
                                     }
                                     if (fromStop != null && reachableLoadError != null) {
                                         Text(
-                                            text =
-                                                stringResource(
-                                                    R.string.widget_destinations_unavailable,
-                                                    reachableLoadError!!,
-                                                ),
+                                            text = stringResource(R.string.widget_destinations_unavailable),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(top = 6.dp),

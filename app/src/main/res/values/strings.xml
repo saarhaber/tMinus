@@ -172,7 +172,7 @@
     <string name="widget_save_error">Failed to save. Please try again.</string>
     <string name="widget_loading_timeout_tminus">Unable to load stops. Check your connection or add a V3 API key in tMinus settings, then try again.</string>
     <string name="widget_select_different_stops">Choose a different destination.</string>
-    <string name="widget_destinations_unavailable">Could not load destinations for this stop (%1$s). Check your connection or add a V3 API key in Settings, then try again.</string>
+    <string name="widget_destinations_unavailable">Could not load destinations for this stop. Check your connection or add a V3 API key in Settings, then try again.</string>
     <string name="widget_configure">Tap to set up</string>
     <string name="widget_tap_to_refresh">Tap to refresh</string>
     <string name="widget_set_from_to">Set your from and to stops</string>
