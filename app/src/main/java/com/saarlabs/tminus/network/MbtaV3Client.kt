@@ -212,9 +212,11 @@ public class MbtaV3Client(private val apiKey: String?) {
     }
 
     /**
-     * Parent stations/stops reachable from [fromStopId] without transfers, using route patterns
-     * through that stop (same idea as PR #1593). If that yields no destinations, falls back to
-     * stations on the same route(s) as the origin.
+     * Parent stations on the same route-pattern line as [fromStopId] without transfers, using
+     * sample trips from route patterns through that stop. Stops both *after* and *before* the
+     * origin on the pattern are included so bidirectional commuter-rail pairs (e.g. Natick Center
+     * and Back Bay on Worcester Line patterns ordered toward Worcester) still appear as
+     * destinations. If that yields no destinations, falls back to stations on the same route(s).
      */
     public suspend fun fetchReachableDestinationStops(
         fromStopId: String,
@@ -269,9 +271,11 @@ public class MbtaV3Client(private val apiKey: String?) {
                                 orderedStopIds.indexOfFirst { sid ->
                                     Stop.equalOrFamily(sid, fromStopId, allStops)
                                 }
-                            if (fromIdx < 0 || fromIdx >= orderedStopIds.lastIndex) continue
-                            for (i in (fromIdx + 1) until orderedStopIds.size) {
+                            if (fromIdx < 0) continue
+                            for (i in orderedStopIds.indices) {
+                                if (i == fromIdx) continue
                                 val sid = orderedStopIds[i]
+                                if (Stop.equalOrFamily(sid, fromStopId, allStops)) continue
                                 val raw = allStops[sid] ?: continue
                                 val parent = raw.resolveParent(allStops)
                                 reachable.add(parent.id)
