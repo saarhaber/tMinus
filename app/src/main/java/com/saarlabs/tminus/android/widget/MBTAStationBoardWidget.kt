@@ -209,7 +209,9 @@ private object StationBoardContent {
         // clipping the time on long route names like "Framingham/Worcester".
         val widgetFontScale = (0.6f + 0.4f * fontScale)
         val scale = baseScale * widgetFontScale
-        val stackTime = w < 260f
+        // Stack minutes under the headsign on typical phone widget widths so the destination
+        // line is not squeezed beside a fixed-width time column (was clipping long headsigns).
+        val stackTime = w < 300f
         val padding = (12f * baseScale).coerceIn(8f, 20f).dp
         val title = (16f * scale).coerceIn(12f, 28f).sp
         val subtitle = (11f * scale).coerceIn(9f, 18f).sp
@@ -562,6 +564,7 @@ private object StationBoardContent {
                                     departure = d,
                                     use24Hour = use24Hour,
                                     typography = t,
+                                    stackTime = t.stackTime,
                                 )
                             }
                         }
@@ -577,6 +580,7 @@ private object StationBoardContent {
         departure: WidgetStationBoardDeparture,
         use24Hour: Boolean,
         typography: BoardTypography,
+        stackTime: Boolean,
     ) {
         val fallback = primaryTextColor(context)
         val routeColor =
@@ -587,6 +591,13 @@ private object StationBoardContent {
         val secondary = secondaryTextColor(context)
         val rowBg = rowBackground(context)
         val t = typography
+        val minutesText =
+            if (departure.minutesUntil <= 0) {
+                context.getString(R.string.widget_now)
+            } else {
+                context.getString(R.string.widget_min_short, departure.minutesUntil)
+            }
+        val clockText = departure.departureTime.formattedTime(use24Hour)
 
         Row(
             modifier =
@@ -627,60 +638,112 @@ private object StationBoardContent {
                 )
             }
             Spacer(modifier = GlanceModifier.width(t.gapMedium))
-            Column(modifier = GlanceModifier.defaultWeight()) {
-                Text(
-                    text = departure.headsign,
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    style =
-                        TextStyle(
-                            color = ColorProvider(primary),
-                            fontSize = t.headsign,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Start,
-                        ),
-                    maxLines = 2,
-                )
-                departure.platform?.let { plat ->
+            if (stackTime) {
+                Column(modifier = GlanceModifier.defaultWeight()) {
                     Text(
-                        text = context.getString(R.string.widget_track_short, plat),
+                        text = departure.headsign,
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(primary),
+                                fontSize = t.headsign,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = 3,
+                    )
+                    departure.platform?.let { plat ->
+                        Text(
+                            text = context.getString(R.string.widget_track_short, plat),
+                            style =
+                                TextStyle(
+                                    color = ColorProvider(secondary),
+                                    fontSize = t.caption,
+                                    textAlign = TextAlign.Start,
+                                ),
+                            maxLines = 1,
+                        )
+                    }
+                    Spacer(modifier = GlanceModifier.height(t.gapSmall))
+                    Row(
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = minutesText,
+                            style =
+                                TextStyle(
+                                    color = ColorProvider(routeColor),
+                                    fontSize = t.time,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Start,
+                                ),
+                            maxLines = 1,
+                        )
+                        Spacer(modifier = GlanceModifier.width(t.gapSmall))
+                        Text(
+                            text = clockText,
+                            style =
+                                TextStyle(
+                                    color = ColorProvider(secondary),
+                                    fontSize = t.caption,
+                                    textAlign = TextAlign.Start,
+                                ),
+                            maxLines = 1,
+                        )
+                    }
+                }
+            } else {
+                Column(modifier = GlanceModifier.defaultWeight()) {
+                    Text(
+                        text = departure.headsign,
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(primary),
+                                fontSize = t.headsign,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = 3,
+                    )
+                    departure.platform?.let { plat ->
+                        Text(
+                            text = context.getString(R.string.widget_track_short, plat),
+                            style =
+                                TextStyle(
+                                    color = ColorProvider(secondary),
+                                    fontSize = t.caption,
+                                    textAlign = TextAlign.Start,
+                                ),
+                            maxLines = 1,
+                        )
+                    }
+                }
+                Spacer(modifier = GlanceModifier.width(t.gapSmall))
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = minutesText,
+                        style =
+                            TextStyle(
+                                color = ColorProvider(routeColor),
+                                fontSize = t.time,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.End,
+                            ),
+                        maxLines = 1,
+                    )
+                    Text(
+                        text = clockText,
                         style =
                             TextStyle(
                                 color = ColorProvider(secondary),
                                 fontSize = t.caption,
-                                textAlign = TextAlign.Start,
+                                textAlign = TextAlign.End,
                             ),
                         maxLines = 1,
                     )
                 }
-            }
-            Spacer(modifier = GlanceModifier.width(t.gapSmall))
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text =
-                        if (departure.minutesUntil <= 0) {
-                            context.getString(R.string.widget_now)
-                        } else {
-                            context.getString(R.string.widget_min_short, departure.minutesUntil)
-                        },
-                    style =
-                        TextStyle(
-                            color = ColorProvider(routeColor),
-                            fontSize = t.time,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.End,
-                        ),
-                    maxLines = 1,
-                )
-                Text(
-                    text = departure.departureTime.formattedTime(use24Hour),
-                    style =
-                        TextStyle(
-                            color = ColorProvider(secondary),
-                            fontSize = t.caption,
-                            textAlign = TextAlign.End,
-                        ),
-                    maxLines = 1,
-                )
             }
         }
     }
