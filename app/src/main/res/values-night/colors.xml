@@ -11,4 +11,7 @@
     <color name="widget_on_surface">#FFE2E6EE</color>
     <color name="widget_on_surface_variant">#FFB1B7C2</color>
     <color name="widget_accent">#FFADC6FF</color>
+
+    <color name="widget_cr_glass_body">#E0121822</color>
+    <color name="widget_cr_glass_strip">#F0101620</color>
 </resources>

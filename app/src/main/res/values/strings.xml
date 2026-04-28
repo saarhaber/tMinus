@@ -198,6 +198,14 @@
     <string name="widget_refresh_short">Refresh</string>
     <string name="widget_track_short">Track %1$s</string>
     <string name="widget_train">Train %1$s</string>
+    <string name="widget_mbta_mark_content_description">MBTA</string>
+    <string name="widget_trip_route_type_commuter">Commuter Rail</string>
+    <string name="widget_trip_bound">%1$s Bound</string>
+    <string name="widget_trip_arrow_long">————————</string>
+    <string name="widget_trip_next_train">Next Train %1$s</string>
+    <string name="widget_trip_arriving_parenthetical">(Arriving %1$s %2$s)</string>
+    <string name="widget_trip_next_to_destination">Next: %1$s %2$s</string>
+    <string name="widget_trip_next_time_only">Next: %1$s</string>
 
     <string name="widget_station_board_label">Station board</string>
     <string name="widget_station_board_description">Upcoming scheduled departures at one stop, with line colors and countdown.</string>

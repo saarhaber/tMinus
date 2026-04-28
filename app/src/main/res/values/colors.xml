@@ -18,4 +18,8 @@
     <color name="widget_on_surface">#FF14181F</color>
     <color name="widget_on_surface_variant">#FF4A4F5A</color>
     <color name="widget_accent">#FF1F54A8</color>
+
+    <!-- Commuter rail trip widget: frosted body + trip strip (works on light wallpapers). -->
+    <color name="widget_cr_glass_body">#D91E2838</color>
+    <color name="widget_cr_glass_strip">#E8151F2A</color>
 </resources>
