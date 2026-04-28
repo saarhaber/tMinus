@@ -63,7 +63,6 @@ import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.ui.StopSelectionTitleWithSubtitle
-import com.saarlabs.tminus.ui.stopOneLineDisplay
 import com.saarlabs.tminus.ui.stopSelectionSubtitle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -468,16 +467,8 @@ private fun WidgetConfigScreen(
                                                                     WidgetTripConfig(
                                                                         fromStopId = fromResolved.id,
                                                                         toStopId = toResolved.id,
-                                                                        fromLabel =
-                                                                            stopOneLineDisplay(
-                                                                                fromResolved,
-                                                                                context.resources,
-                                                                            ),
-                                                                        toLabel =
-                                                                            stopOneLineDisplay(
-                                                                                toResolved,
-                                                                                context.resources,
-                                                                            ),
+                                                                        fromLabel = fromResolved.name,
+                                                                        toLabel = toResolved.name,
                                                                     )
                                                             coroutineScope.launch {
                                                                 try {

@@ -45,6 +45,17 @@ public fun stopOneLineDisplay(stop: Stop, res: Resources): String {
     return if (sub.isEmpty()) stop.name else "${stop.name} ($sub)"
 }
 
+/**
+ * Label shown on trip widgets: plain stop name. Treats legacy saved values that used
+ * [stopOneLineDisplay] as equivalent to [stop.name] so "(Transit hub)" subtitles do not appear.
+ */
+public fun widgetTripStopDisplayLabel(configured: String, stop: Stop, res: Resources): String {
+    val trimmed = configured.trim()
+    if (trimmed.isEmpty() || trimmed == stop.name) return stop.name
+    if (trimmed == stopOneLineDisplay(stop, res)) return stop.name
+    return trimmed
+}
+
 @Composable
 public fun stopSelectionSubtitle(stop: Stop): String {
     val res = LocalContext.current.resources

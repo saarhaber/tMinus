@@ -242,58 +242,68 @@ internal object TripWidgetCommuterLayouts {
         t: TripTypography,
         centerTitle: Boolean,
     ) {
-        Row(
+        val routeAlign = if (centerTitle) TextAlign.Center else TextAlign.Start
+        Column(
             modifier =
                 GlanceModifier.fillMaxWidth()
                     .background(routeColor)
                     .padding(horizontal = t.padding, vertical = t.gapSm),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_widget_mbta_t_circle),
-                contentDescription = context.getString(R.string.widget_mbta_mark_content_description),
-                modifier = GlanceModifier.width(t.logoSize).height(t.logoSize),
-            )
-            Spacer(modifier = GlanceModifier.width(t.gapSm))
-            Column(
-                modifier = GlanceModifier.defaultWeight(),
-                horizontalAlignment =
-                    if (centerTitle) Alignment.CenterHorizontally else Alignment.Start,
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = tripData.route.label,
-                    style =
-                        TextStyle(
-                            color = ColorProvider(routeTextColor),
-                            fontSize = t.headerRoute,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
-                        ),
-                    maxLines = 2,
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_mbta_t_circle),
+                    contentDescription =
+                        context.getString(R.string.widget_mbta_mark_content_description),
+                    modifier = GlanceModifier.width(t.logoSize).height(t.logoSize),
                 )
+                Spacer(modifier = GlanceModifier.width(t.gapSm))
+                Column(
+                    modifier = GlanceModifier.defaultWeight(),
+                    horizontalAlignment =
+                        if (centerTitle) Alignment.CenterHorizontally else Alignment.Start,
+                ) {
+                    Text(
+                        text = tripData.route.label,
+                        style =
+                            TextStyle(
+                                color = ColorProvider(routeTextColor),
+                                fontSize = t.headerRoute,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = routeAlign,
+                            ),
+                        maxLines = 2,
+                    )
+                    Text(
+                        text = context.getString(R.string.widget_trip_route_type_commuter),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(routeTextColor.copy(alpha = 0.88f)),
+                                fontSize = t.headerDest,
+                                fontWeight = FontWeight.Normal,
+                                textAlign = routeAlign,
+                            ),
+                        maxLines = 1,
+                    )
+                }
+            }
+            if (trainLabel.isNotBlank()) {
+                Spacer(modifier = GlanceModifier.height(t.gapXs))
                 Text(
-                    text = context.getString(R.string.widget_trip_route_type_commuter),
+                    text = trainLabel,
+                    modifier = GlanceModifier.fillMaxWidth(),
                     style =
                         TextStyle(
-                            color = ColorProvider(routeTextColor.copy(alpha = 0.88f)),
+                            color = ColorProvider(routeTextColor.copy(alpha = 0.9f)),
                             fontSize = t.headerDest,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = if (centerTitle) TextAlign.Center else TextAlign.Start,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
                         ),
-                    maxLines = 1,
+                    maxLines = 3,
                 )
             }
-            Text(
-                text = trainLabel,
-                style =
-                    TextStyle(
-                        color = ColorProvider(routeTextColor.copy(alpha = 0.9f)),
-                        fontSize = t.headerDest,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.End,
-                    ),
-                maxLines = 2,
-            )
         }
     }
 
@@ -406,38 +416,20 @@ internal object TripWidgetCommuterLayouts {
                                 ),
                             maxLines = 1,
                         )
-                        Text(
-                            text = context.getString(R.string.widget_trip_arrow_long),
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(onSurface.copy(alpha = 0.85f)),
-                                    fontSize = t.stripPrimary,
-                                ),
-                            maxLines = 1,
-                        )
                     }
                     Spacer(modifier = GlanceModifier.height(t.gapXs))
                     Text(
-                        text = context.getString(R.string.widget_trip_next_train, depStr),
+                        text =
+                            context.getString(
+                                R.string.widget_trip_next_train_arrives,
+                                depStr,
+                                arrStr,
+                            ),
                         style =
                             TextStyle(
                                 color = ColorProvider(onSurface),
                                 fontSize = t.stripPrimary,
                                 fontWeight = FontWeight.Bold,
-                            ),
-                        maxLines = 1,
-                    )
-                    Text(
-                        text =
-                            context.getString(
-                                R.string.widget_trip_arriving_parenthetical,
-                                toLabel,
-                                arrStr,
-                            ),
-                        style =
-                            TextStyle(
-                                color = ColorProvider(onSurfaceVariant),
-                                fontSize = t.stripSecondary,
                             ),
                         maxLines = 2,
                     )

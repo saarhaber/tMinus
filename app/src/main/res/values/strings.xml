@@ -201,9 +201,8 @@
     <string name="widget_mbta_mark_content_description">MBTA</string>
     <string name="widget_trip_route_type_commuter">Commuter Rail</string>
     <string name="widget_trip_bound">%1$s Bound</string>
-    <string name="widget_trip_arrow_long">————————</string>
     <string name="widget_trip_next_train">Next Train %1$s</string>
-    <string name="widget_trip_arriving_parenthetical">(Arriving %1$s %2$s)</string>
+    <string name="widget_trip_next_train_arrives">Next Train %1$s · arr %2$s</string>
     <string name="widget_trip_next_to_destination">Next: %1$s %2$s</string>
     <string name="widget_trip_next_time_only">Next: %1$s</string>
 
