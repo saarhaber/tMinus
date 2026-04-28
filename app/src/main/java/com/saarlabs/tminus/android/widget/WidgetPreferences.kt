@@ -89,7 +89,14 @@ internal class WidgetPreferences(private val context: Context) {
         val stopLabel = lines.getOrNull(1)?.trim() ?: ""
         val routeLine = lines.getOrNull(2)?.trim().orEmpty()
         val routeId = routeLine.takeIf { it.isNotEmpty() }
-        return WidgetStationBoardConfig(stopId = stopId, stopLabel = stopLabel, routeId = routeId)
+        val destinationLine = lines.getOrNull(3)?.trim().orEmpty()
+        val destinationHeadsign = destinationLine.takeIf { it.isNotEmpty() }
+        return WidgetStationBoardConfig(
+            stopId = stopId,
+            stopLabel = stopLabel,
+            routeId = routeId,
+            destinationHeadsign = destinationHeadsign,
+        )
     }
 
     suspend fun getStationBoardConfigOnce(appWidgetId: Int): WidgetStationBoardConfig? =
@@ -98,7 +105,13 @@ internal class WidgetPreferences(private val context: Context) {
     suspend fun setStationBoardConfig(appWidgetId: Int, config: WidgetStationBoardConfig) =
         withContext(Dispatchers.IO) {
             val value =
-                listOf(config.stopId, config.stopLabel, config.routeId ?: "").joinToString("\n")
+                listOf(
+                        config.stopId,
+                        config.stopLabel,
+                        config.routeId ?: "",
+                        config.destinationHeadsign ?: "",
+                    )
+                    .joinToString("\n")
             val ok = prefs.edit().putString(stationBoardConfigKey(appWidgetId), value).commit()
             // #region agent log
             AgentDebugLog.log(

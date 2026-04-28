@@ -198,8 +198,9 @@ public class WidgetUpdateWorker(appContext: Context, workerParams: WorkerParamet
         public const val WORK_NAME: String = "WidgetUpdate"
         public const val PERIODIC_WORK_NAME: String = "WidgetUpdatePeriodic"
         public const val KEY_APP_WIDGET_IDS: String = "appWidgetIds"
-        internal const val MAX_RETRIES = 12
-        internal const val RETRY_DELAY_MS = 400L
+        /** Glance id registry can lag right after configuration — extra attempts reduce stuck placeholders. */
+        internal const val MAX_RETRIES = 18
+        internal const val RETRY_DELAY_MS = 450L
 
         /**
          * Refreshes all home screen widgets (trip and station board). Pass specific IDs after

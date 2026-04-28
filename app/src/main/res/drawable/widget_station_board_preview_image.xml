@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static fallback for widget picker when previewLayout cannot be inflated (see previewImage on appwidget-provider). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="160dp"
+    android:viewportWidth="200"
+    android:viewportHeight="160">
+    <path
+        android:fillColor="#FFF2F2F7"
+        android:pathData="M16,0 L184,0 Q200,0 200,16 L200,144 Q200,160 184,160 L16,160 Q0,160 0,144 L0,16 Q0,0 16,0 Z" />
+    <path
+        android:fillColor="#FF1F54A8"
+        android:pathData="M16,10 L184,10 Q188,10 188,14 L188,46 Q188,50 184,50 L16,50 Q12,50 12,46 L12,14 Q12,10 16,10 Z" />
+    <path
+        android:fillColor="#FFF0F4FB"
+        android:pathData="M16,58 L184,58 Q188,58 188,62 L188,148 Q188,152 184,152 L16,152 Q12,152 12,148 L12,62 Q12,58 16,58 Z" />
+</vector>

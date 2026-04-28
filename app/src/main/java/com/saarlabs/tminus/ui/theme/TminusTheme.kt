@@ -8,7 +8,6 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,13 +134,11 @@ public fun TminusTheme(
     val fontScale = rememberUserFontScale()
     val baseTypography = MaterialTheme.typography
     val scaledTypo = remember(fontScale, baseTypography) { scaledTypography(baseTypography, fontScale) }
-    CompositionLocalProvider(LocalAppFontScale provides fontScale) {
-        MaterialTheme(
-            colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-            typography = scaledTypo,
-            content = content,
-        )
-    }
+    MaterialTheme(
+        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
+        typography = scaledTypo,
+        content = content,
+    )
 }
 
 /**

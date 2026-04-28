@@ -123,7 +123,7 @@
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_body">Light, dark, or system. Applies immediately.</string>
     <string name="settings_font_scale_title">Text size</string>
-    <string name="settings_font_scale_body">Make text bigger or smaller across the app and widgets.</string>
+    <string name="settings_font_scale_body">Make text bigger or smaller across the app.</string>
     <string name="settings_font_scale_value">%1$d%%</string>
     <string name="settings_font_scale_preview">Sample reading size</string>
     <string name="settings_theme_system_cd">Match device theme</string>
@@ -158,8 +158,12 @@
     <string name="widget_preview_route_name_cr">CR</string>
     <string name="widget_preview_train_headsign">Inbound</string>
     <string name="widget_preview_from_to">Natick Center → Back Bay</string>
+    <string name="widget_preview_from_stop_inline">Natick Center</string>
+    <string name="widget_preview_to_stop_arrow">→ Back Bay</string>
+    <string name="widget_preview_tracks_sample">Track 2 • Track 5</string>
     <string name="widget_preview_in_minutes_sample">in 12 min</string>
     <string name="widget_preview_times">7:42 AM → 8:18 AM</string>
+    <string name="widget_preview_trip_minutes_digit">12</string>
     <string name="widget_configure_title">Configure Trip Widget</string>
     <string name="widget_from">From</string>
     <string name="widget_to">To</string>
@@ -191,6 +195,9 @@
     <string name="widget_station_board_description">Upcoming scheduled departures at one stop, with line colors and countdown.</string>
     <string name="widget_station_board_configure_title">Configure station board</string>
     <string name="widget_station_board_scheduled_subtitle">Scheduled departures</string>
+    <string name="widget_station_board_scheduled_filtered">%1$s · Scheduled departures</string>
+    <string name="widget_station_board_destination_section">Destination</string>
+    <string name="widget_station_board_destination_all">All destinations</string>
     <string name="widget_station_board_configure_hint">Choose a stop and optional line</string>
     <string name="widget_station_board_no_departures">No upcoming departures</string>
     <string name="widget_station_board_times_error">Departures unavailable. Open tMinus or check your connection.</string>
@@ -203,6 +210,8 @@
     <string name="widget_preview_sb_row2_dest">Heath St</string>
     <string name="widget_preview_sb_row2_clock">7:48 AM</string>
     <string name="widget_preview_sb_row2_min">in 6 min</string>
+    <string name="widget_preview_sb_row1_times_line">in 3 min · 7:45 AM</string>
+    <string name="widget_preview_sb_row2_times_line">in 6 min · 7:48 AM</string>
     <string name="widget_station_board_select_stop_placeholder">Search stops</string>
     <string name="widget_station_board_selecting_stop">Station</string>
     <string name="widget_station_board_route_section">Line filter</string>

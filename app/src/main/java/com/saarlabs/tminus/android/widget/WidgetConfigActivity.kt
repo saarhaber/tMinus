@@ -62,9 +62,7 @@ import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.GlobalDataStore
 import com.saarlabs.tminus.R
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -480,18 +478,16 @@ private fun WidgetConfigScreen(
                                                                         )
                                                                     }
                                                                     val appContext = context.applicationContext
+                                                                    updateTripWidgetWithRetry(
+                                                                        appContext,
+                                                                        appWidgetId,
+                                                                    )
+                                                                    WidgetUpdateWorker.enqueueRefresh(
+                                                                        appContext,
+                                                                        intArrayOf(appWidgetId),
+                                                                    )
                                                                     onComplete()
-                                                                    CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-                                                                        updateTripWidgetWithRetry(
-                                                                            appContext,
-                                                                            appWidgetId,
-                                                                        )
-                                                                        WidgetUpdateWorker.enqueueRefresh(
-                                                                            appContext,
-                                                                            intArrayOf(appWidgetId),
-                                                                        )
-                                                                    }
-                                                                    } catch (e: Exception) {
+                                                                } catch (e: Exception) {
                                                                         android.util.Log.e(
                                                                             "WidgetConfig",
                                                                             "Failed to save widget config",

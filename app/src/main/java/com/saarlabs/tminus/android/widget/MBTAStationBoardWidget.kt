@@ -17,7 +17,6 @@ import androidx.glance.LocalSize
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
@@ -31,6 +30,7 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -58,6 +58,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.math.max
+import kotlin.math.pow
 
 public class MBTAStationBoardWidget : GlanceAppWidget() {
 
@@ -87,8 +89,9 @@ public class MBTAStationBoardWidget : GlanceAppWidget() {
 
         var config = withContext(Dispatchers.IO) { widgetPreferences.getStationBoardConfigOnce(appWidgetId) }
         if (config == null) {
-            repeat(8) {
-                delay(250)
+            // Config may land milliseconds after Glance starts composing (save vs update race).
+            repeat(36) {
+                delay(200)
                 config = withContext(Dispatchers.IO) { widgetPreferences.getStationBoardConfigOnce(appWidgetId) }
                 if (config != null) return@repeat
             }
@@ -103,7 +106,7 @@ public class MBTAStationBoardWidget : GlanceAppWidget() {
             )
             // #endregion
             withContext(Dispatchers.IO) {
-                WidgetPreferences(context.applicationContext).setPendingStationBoardConfigWidgetId(appWidgetId)
+                widgetPreferences.setPendingStationBoardConfigWidgetId(appWidgetId)
             }
             provideContent {
                 StationBoardContent.ConfigurePrompt(context = context, appWidgetId = appWidgetId)
@@ -147,6 +150,7 @@ public class MBTAStationBoardWidget : GlanceAppWidget() {
                     globalData = globalData,
                     stopId = cfg.stopId,
                     routeFilter = cfg.routeId,
+                    destinationFilter = cfg.destinationHeadsign,
                     now = EasternTimeInstant.now(),
                     limit = 12,
                 )
@@ -162,10 +166,16 @@ public class MBTAStationBoardWidget : GlanceAppWidget() {
                     cfg.stopLabel.ifEmpty {
                         globalData.getStop(cfg.stopId)?.resolveParent(globalData.stops)?.name.orEmpty()
                     }
+                val subtitleSecond =
+                    cfg.destinationHeadsign?.takeIf { it.isNotBlank() }?.let { dest ->
+                        context.getString(R.string.widget_station_board_scheduled_filtered, dest)
+                    }
+                        ?: context.getString(R.string.widget_station_board_scheduled_subtitle)
                 provideContent {
                     StationBoardContent.Board(
                         context = context,
                         stationTitle = stationTitle,
+                        scheduledSubtitle = subtitleSecond,
                         departures = departures,
                         use24Hour = use24Hour,
                         fontScale = fontScale,
@@ -193,8 +203,17 @@ private object StationBoardContent {
         val gapMedium: Dp,
         val rowPaddingV: Dp,
         val rowCorner: Dp,
-        val routeChipMinWidth: Dp,
-        val stackTime: Boolean,
+        val routeBannerMaxLines: Int,
+        /** Station name in board header — slightly below main [title] tier but readable. */
+        val stationHeaderTitle: TextUnit,
+        /** "Scheduled departures" — match general [subtitle] scaling so it stays legible. */
+        val stationHeaderSubtitle: TextUnit,
+        /** Space below destination before the schedule line (tighter when height is limited). */
+        val scheduleGapBelowDestination: Dp,
+        /** LazyColumn bottom inset — shrinks when vertical space is tight so two rows fit. */
+        val listPaddingBottom: Dp,
+        /** Blue header band vertical padding (can differ from row gaps). */
+        val headerBandPaddingVertical: Dp,
     )
 
     @Composable
@@ -203,30 +222,68 @@ private object StationBoardContent {
         val w = size.width.value.coerceAtLeast(1f)
         val h = size.height.value.coerceAtLeast(1f)
         val shortEdge = minOf(w, h)
-        val baseScale = (shortEdge / 112f).coerceIn(0.55f, 2.2f)
+        // Anchor to appwidget min dimensions so resizing moves sizes smoothly (xml: minWidth 180, minHeight 155).
+        val refShort = 155f
+        val refHeight = 220f
+        val verticalTight = h < 275f
+        val tightFactor = if (verticalTight) 0.88f else 1f
+        // When the widget is short, tighten departure rows so two trips usually fit without clipping.
+        val verticalCompact =
+            when {
+                h < 255f -> 0.74f
+                h < 295f -> 0.82f
+                h < 345f -> 0.90f
+                else -> 1f
+            }
+        // Short edge + height both shrink typography when the viewport gets cramped (wide-but-short, etc.).
+        val edgeScale = (shortEdge / refShort).coerceIn(0.42f, 2.75f)
+        val heightScale = (h / refHeight).coerceIn(0.48f, 1.38f)
+        val viewportScale = edgeScale * heightScale
         // Widgets have far less horizontal room than the in-app screens, so blunt the user's
         // fontScale a bit (1.6× in app → ~1.24× here) to keep the route chip + minutes column from
         // clipping the time on long route names like "Framingham/Worcester".
         val widgetFontScale = (0.6f + 0.4f * fontScale)
-        val scale = baseScale * widgetFontScale
-        // Stack minutes under the headsign on typical phone widget widths so the destination
-        // line is not squeezed beside a fixed-width time column (was clipping long headsigns).
-        val stackTime = w < 300f
-        val padding = (12f * baseScale).coerceIn(8f, 20f).dp
-        val title = (16f * scale).coerceIn(12f, 28f).sp
-        val subtitle = (11f * scale).coerceIn(9f, 18f).sp
-        val route = (11f * scale).coerceIn(9f, 18f).sp
-        val headsign = (13f * scale).coerceIn(10f, 22f).sp
-        val time = (14f * scale).coerceIn(11f, 24f).sp
-        val caption = (11f * scale).coerceIn(9f, 18f).sp
-        val gapSmall = (4f * baseScale).coerceIn(3f, 10f).dp
-        val gapMedium = (8f * baseScale).coerceIn(4f, 14f).dp
-        val routeBoxH = (8f * baseScale).coerceIn(6f, 14f).dp
-        val routeBoxV = (5f * baseScale).coerceIn(4f, 10f).dp
-        val routeCorner = (10f * baseScale).coerceIn(8f, 16f).dp
-        val rowPaddingV = (8f * baseScale).coerceIn(6f, 14f).dp
-        val rowCorner = (14f * baseScale).coerceIn(10f, 20f).dp
-        val routeChipMinWidth = (68f * baseScale).coerceIn(52f, 110f).dp
+        val scale = viewportScale * widgetFontScale * tightFactor
+        // Smaller text overall so more trips fit; header gets extra compaction.
+        val dense = scale * 0.72f
+        val gapScalar = (shortEdge / refShort).coerceIn(0.45f, 2.5f)
+        val padding = (11f * viewportScale).coerceIn(5f, 18f).dp
+        // Wide dynamic range — avoid fixed floors so tiny placements keep shrinking with LocalSize.
+        val title = (15f * dense).coerceIn(7f, 26f).sp
+        val subtitle = (10f * dense).coerceIn(6f, 17f).sp
+        val stationHeaderTitle = (14f * dense).coerceIn(12f, 22f).sp
+        val stationHeaderSubtitle = (10f * dense).coerceIn(9f, 16f).sp
+        // Slightly smaller route banner text when the widget is narrow so wrapped lines fit.
+        val routeShrink =
+            when {
+                shortEdge < 158f -> 0.82f
+                shortEdge < 178f -> 0.88f
+                verticalTight -> 0.92f
+                else -> 1f
+            }
+        val route = (10f * dense * routeShrink * verticalCompact.pow(0.88f)).coerceIn(5f, 14f).sp
+        val headsign = (11f * dense * verticalCompact.pow(0.92f)).coerceIn(7f, 16f).sp
+        val time = (10.5f * dense * verticalCompact).coerceIn(7f, 15f).sp
+        val caption = (10f * dense).coerceIn(6f, 15f).sp
+        val gapSmall = (4f * gapScalar * verticalCompact).coerceIn(2f, 10f).dp
+        val gapMedium = (8f * gapScalar * verticalCompact).coerceIn(3f, 14f).dp
+        val routeBoxH = (8f * gapScalar * verticalCompact).coerceIn(4f, 13f).dp
+        val routeBoxV = (3.5f * gapScalar * verticalCompact).coerceIn(2f, 7f).dp
+        val routeCorner = (10f * gapScalar * verticalCompact).coerceIn(6f, 16f).dp
+        val rowPaddingV = (5f * gapScalar * verticalCompact).coerceIn(3f, 10f).dp
+        val rowCorner = (14f * gapScalar * verticalCompact).coerceIn(8f, 21f).dp
+        // Always allow several wrapped lines in the colored route banner — single-line mode caused
+        // "Framingham/Worcester …" ellipsis on narrow widgets.
+        val routeBannerMaxLines = if (verticalTight) 3 else 4
+        val scheduleGapBelowDestination =
+            when {
+                h < 265f -> 1.dp
+                h < 315f -> 2.dp
+                else -> 3.dp
+            }
+        val listPaddingBottom = max(padding.value * verticalCompact, 4f).dp
+        val headerBandPaddingVertical =
+            (6f * gapScalar * verticalCompact).coerceIn(4f, 11f).dp
         return BoardTypography(
             title = title,
             subtitle = subtitle,
@@ -242,19 +299,31 @@ private object StationBoardContent {
             gapMedium = gapMedium,
             rowPaddingV = rowPaddingV,
             rowCorner = rowCorner,
-            routeChipMinWidth = routeChipMinWidth,
-            stackTime = stackTime,
+            routeBannerMaxLines = routeBannerMaxLines,
+            stationHeaderTitle = stationHeaderTitle,
+            stationHeaderSubtitle = stationHeaderSubtitle,
+            scheduleGapBelowDestination = scheduleGapBelowDestination,
+            listPaddingBottom = listPaddingBottom,
+            headerBandPaddingVertical = headerBandPaddingVertical,
         )
     }
 
     /**
-     * Keeps route pills readable inside a width-capped chip: shortens common commuter-rail patterns
-     * (e.g. "Framingham / Worcester Line" → "Framingham/Worcester") while leaving names like "Red Line" unchanged.
+     * Normalizes commuter-rail-style labels and splits long "A/B" names onto two lines so the
+     * banner wraps instead of ellipsizing on narrow widgets.
      */
     private fun routeLabelForWidget(label: String): String {
         var s = label.trim().replace(" / ", "/")
         if (s.contains("/") && s.endsWith(" Line", ignoreCase = true)) {
             s = s.removeSuffix(" Line").trimEnd()
+        }
+        val slash = s.indexOf('/')
+        if (slash in 1 until s.lastIndex && s.length > 12) {
+            val left = s.substring(0, slash).trim()
+            val right = s.substring(slash + 1).trim()
+            if (left.isNotEmpty() && right.isNotEmpty()) {
+                s = "$left\n$right"
+            }
         }
         return s
     }
@@ -289,62 +358,73 @@ private object StationBoardContent {
                 modifier =
                     GlanceModifier.fillMaxSize()
                         .background(surfaceColor(context))
-                        .cornerRadius(20.dp)
-                        .padding(t.padding)
-                        .clickable(
-                            androidx.glance.appwidget.action.actionStartActivity(
-                                Intent(context, StationBoardWidgetConfigActivity::class.java).apply {
-                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                                },
-                                actionParametersOf(),
-                            ),
-                        ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                        .cornerRadius(22.dp),
             ) {
-                Text(
-                    text = context.getString(R.string.widget_station_board_label),
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    style =
-                        TextStyle(
-                            color = ColorProvider(primaryTextColor(context)),
-                            fontSize = t.title,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        ),
-                    maxLines = 2,
-                )
-                Spacer(modifier = GlanceModifier.height(t.gapSmall))
-                Text(
-                    text = context.getString(R.string.widget_station_board_configure_hint),
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    style =
-                        TextStyle(
-                            color = ColorProvider(secondaryTextColor(context)),
-                            fontSize = t.caption,
-                            textAlign = TextAlign.Center,
-                        ),
-                    maxLines = 4,
-                )
-                Spacer(modifier = GlanceModifier.height(t.gapMedium))
-                Box(
+                // Match board chrome: thin header strip so setup empty states feel cohesive.
+                Column(
                     modifier =
-                        GlanceModifier
-                            .background(accentColor(context))
-                            .cornerRadius(20.dp)
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        GlanceModifier.fillMaxWidth()
+                            .background(headerColor(context))
+                            .padding(horizontal = t.padding, vertical = t.gapMedium),
                 ) {
                     Text(
-                        text = context.getString(R.string.widget_configure),
+                        text = context.getString(R.string.widget_station_board_label),
                         style =
                             TextStyle(
                                 color = ColorProvider(onHeaderColor(context)),
                                 fontSize = t.subtitle,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Start,
                             ),
                         maxLines = 1,
                     )
+                }
+                Column(
+                    modifier =
+                        GlanceModifier.fillMaxSize()
+                            .padding(t.padding)
+                            .clickable(
+                                androidx.glance.appwidget.action.actionStartActivity(
+                                    Intent(context, StationBoardWidgetConfigActivity::class.java).apply {
+                                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                                    },
+                                    actionParametersOf(),
+                                ),
+                            ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = context.getString(R.string.widget_station_board_configure_hint),
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(secondaryTextColor(context)),
+                                fontSize = t.caption,
+                                textAlign = TextAlign.Center,
+                            ),
+                        maxLines = 5,
+                    )
+                    Spacer(modifier = GlanceModifier.height(t.gapMedium))
+                    Box(
+                        modifier =
+                            GlanceModifier
+                                .background(accentColor(context))
+                                .cornerRadius(999.dp)
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                    ) {
+                        Text(
+                            text = context.getString(R.string.widget_configure),
+                            style =
+                                TextStyle(
+                                    color = ColorProvider(onHeaderColor(context)),
+                                    fontSize = t.subtitle,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                ),
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
         }
@@ -359,8 +439,9 @@ private object StationBoardContent {
                 modifier =
                     GlanceModifier.fillMaxSize()
                         .background(surfaceColor(context))
-                        .cornerRadius(20.dp)
-                        .padding(t.padding),
+                        .cornerRadius(22.dp)
+                        .padding(t.padding)
+                        .clickable(actionStartActivity<MainActivity>()),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -376,8 +457,6 @@ private object StationBoardContent {
                         ),
                     maxLines = 4,
                 )
-                Spacer(modifier = GlanceModifier.height(t.gapMedium))
-                RefreshPill(context = context, t = t)
             }
         }
     }
@@ -391,8 +470,9 @@ private object StationBoardContent {
                 modifier =
                     GlanceModifier.fillMaxSize()
                         .background(surfaceColor(context))
-                        .cornerRadius(20.dp)
-                        .padding(t.padding),
+                        .cornerRadius(22.dp)
+                        .padding(t.padding)
+                        .clickable(actionStartActivity<MainActivity>()),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -420,33 +500,7 @@ private object StationBoardContent {
                         ),
                     maxLines = 6,
                 )
-                Spacer(modifier = GlanceModifier.height(t.gapMedium))
-                RefreshPill(context = context, t = t)
             }
-        }
-    }
-
-    @Composable
-    private fun RefreshPill(context: Context, t: BoardTypography) {
-        Box(
-            modifier =
-                GlanceModifier
-                    .background(accentColor(context))
-                    .cornerRadius(20.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable(actionRunCallback<WidgetRefreshActionCallback>(actionParametersOf())),
-        ) {
-            Text(
-                text = context.getString(R.string.widget_tap_to_refresh),
-                style =
-                    TextStyle(
-                        color = ColorProvider(onHeaderColor(context)),
-                        fontSize = t.subtitle,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                    ),
-                maxLines = 1,
-            )
         }
     }
 
@@ -454,6 +508,7 @@ private object StationBoardContent {
     fun Board(
         context: Context,
         stationTitle: String,
+        scheduledSubtitle: String,
         departures: List<WidgetStationBoardDeparture>,
         use24Hour: Boolean,
         fontScale: Float,
@@ -466,67 +521,41 @@ private object StationBoardContent {
                 modifier =
                     GlanceModifier.fillMaxSize()
                         .background(surfaceColor(context))
-                        .cornerRadius(20.dp),
+                        .cornerRadius(22.dp),
             ) {
                 // Colorful header band
                 Column(
                     modifier =
                         GlanceModifier.fillMaxWidth()
                             .background(headerColor(context))
-                            .padding(horizontal = t.padding, vertical = t.padding)
+                            .padding(horizontal = t.padding, vertical = t.headerBandPaddingVertical)
                             .clickable(actionStartActivity<MainActivity>()),
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = stopLabel,
-                            modifier = GlanceModifier.defaultWeight(),
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(onHeaderColor(context)),
-                                    fontSize = t.title,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Start,
-                                ),
-                            maxLines = 2,
-                        )
-                        Spacer(modifier = GlanceModifier.width(t.gapSmall))
-                        Box(
-                            modifier =
-                                GlanceModifier
-                                    .background(Color(0x33FFFFFF))
-                                    .cornerRadius(14.dp)
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                                    .clickable(
-                                        actionRunCallback<WidgetRefreshActionCallback>(
-                                            actionParametersOf(),
-                                        ),
-                                    ),
-                        ) {
-                            Text(
-                                text = context.getString(R.string.widget_refresh_short),
-                                style =
-                                    TextStyle(
-                                        color = ColorProvider(onHeaderColor(context)),
-                                        fontSize = t.caption,
-                                        fontWeight = FontWeight.Medium,
-                                    ),
-                                maxLines = 1,
-                            )
-                        }
-                    }
-                    Spacer(modifier = GlanceModifier.height(t.gapSmall))
                     Text(
-                        text = context.getString(R.string.widget_station_board_scheduled_subtitle),
+                        text = stopLabel,
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(onHeaderColor(context)),
+                                fontSize = t.stationHeaderTitle,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = 3,
+                    )
+                    Spacer(modifier = GlanceModifier.height(2.dp))
+                    Text(
+                        text = scheduledSubtitle,
                         style =
                             TextStyle(
                                 color =
                                     ColorProvider(
-                                        onHeaderColor(context).copy(alpha = 0.85f),
+                                        onHeaderColor(context).copy(alpha = 0.82f),
                                     ),
-                                fontSize = t.subtitle,
+                                fontSize = t.stationHeaderSubtitle,
                                 textAlign = TextAlign.Start,
                             ),
-                        maxLines = 1,
+                        maxLines = 2,
                     )
                 }
 
@@ -554,17 +583,24 @@ private object StationBoardContent {
                     LazyColumn(
                         modifier =
                             GlanceModifier.fillMaxSize()
-                                .padding(horizontal = t.padding, vertical = t.gapSmall),
+                                .padding(
+                                    start = t.padding,
+                                    end = t.padding,
+                                    top = t.gapSmall,
+                                    bottom = t.listPaddingBottom,
+                                ),
                     ) {
-                        items(departures) { d ->
+                        items(departures.size) { index ->
+                            val d = departures[index]
                             Column {
-                                Spacer(modifier = GlanceModifier.height(t.gapSmall))
+                                if (index > 0) {
+                                    Spacer(modifier = GlanceModifier.height(t.gapSmall))
+                                }
                                 DepartureRow(
                                     context = context,
                                     departure = d,
                                     use24Hour = use24Hour,
                                     typography = t,
-                                    stackTime = t.stackTime,
                                 )
                             }
                         }
@@ -580,7 +616,6 @@ private object StationBoardContent {
         departure: WidgetStationBoardDeparture,
         use24Hour: Boolean,
         typography: BoardTypography,
-        stackTime: Boolean,
     ) {
         val fallback = primaryTextColor(context)
         val routeColor =
@@ -598,6 +633,10 @@ private object StationBoardContent {
                 context.getString(R.string.widget_min_short, departure.minutesUntil)
             }
         val clockText = departure.departureTime.formattedTime(use24Hour)
+        val clockLine =
+            departure.platform?.let { plat ->
+                "${clockText} · ${context.getString(R.string.widget_track_short, plat)}"
+            } ?: clockText
 
         Row(
             modifier =
@@ -605,145 +644,67 @@ private object StationBoardContent {
                     .background(rowBg)
                     .cornerRadius(t.rowCorner)
                     .padding(horizontal = t.gapMedium, vertical = t.rowPaddingV),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
-            // Left accent bar using route color
             Box(
                 modifier =
                     GlanceModifier
                         .width(4.dp)
-                        .height(36.dp)
+                        .fillMaxHeight()
                         .background(routeColor)
                         .cornerRadius(4.dp),
             ) {}
             Spacer(modifier = GlanceModifier.width(t.gapMedium))
-            Box(
-                modifier =
-                    GlanceModifier
-                        .background(routeColor)
-                        .cornerRadius(t.routeCorner)
-                        .padding(horizontal = t.routeBoxPaddingH, vertical = t.routeBoxPaddingV),
-                contentAlignment = Alignment.Center,
-            ) {
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                // Full-width line banner so long names (e.g. commuter rail) never squeeze the destination.
+                Box(
+                    modifier =
+                        GlanceModifier
+                            .fillMaxWidth()
+                            .background(routeColor)
+                            .cornerRadius(t.routeCorner)
+                            .padding(horizontal = t.routeBoxPaddingH, vertical = t.routeBoxPaddingV),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        text = routeLabelForWidget(departure.route.label),
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style =
+                            TextStyle(
+                                color = ColorProvider(routeTextColor),
+                                fontSize = t.route,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Start,
+                            ),
+                        maxLines = t.routeBannerMaxLines,
+                    )
+                }
+                Spacer(modifier = GlanceModifier.height(t.gapSmall))
                 Text(
-                    text = routeLabelForWidget(departure.route.label),
+                    text = departure.headsign,
+                    modifier = GlanceModifier.fillMaxWidth(),
                     style =
                         TextStyle(
-                            color = ColorProvider(routeTextColor),
-                            fontSize = t.route,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
+                            color = ColorProvider(primary),
+                            fontSize = t.headsign,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Start,
                         ),
-                    maxLines = 2,
+                    maxLines = 4,
                 )
-            }
-            Spacer(modifier = GlanceModifier.width(t.gapMedium))
-            if (stackTime) {
-                Column(modifier = GlanceModifier.defaultWeight()) {
-                    Text(
-                        text = departure.headsign,
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        style =
-                            TextStyle(
-                                color = ColorProvider(primary),
-                                fontSize = t.headsign,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Start,
-                            ),
-                        maxLines = 3,
-                    )
-                    departure.platform?.let { plat ->
-                        Text(
-                            text = context.getString(R.string.widget_track_short, plat),
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(secondary),
-                                    fontSize = t.caption,
-                                    textAlign = TextAlign.Start,
-                                ),
-                            maxLines = 1,
-                        )
-                    }
-                    Spacer(modifier = GlanceModifier.height(t.gapSmall))
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = minutesText,
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(routeColor),
-                                    fontSize = t.time,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Start,
-                                ),
-                            maxLines = 1,
-                        )
-                        Spacer(modifier = GlanceModifier.width(t.gapSmall))
-                        Text(
-                            text = clockText,
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(secondary),
-                                    fontSize = t.caption,
-                                    textAlign = TextAlign.Start,
-                                ),
-                            maxLines = 1,
-                        )
-                    }
-                }
-            } else {
-                Column(modifier = GlanceModifier.defaultWeight()) {
-                    Text(
-                        text = departure.headsign,
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        style =
-                            TextStyle(
-                                color = ColorProvider(primary),
-                                fontSize = t.headsign,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Start,
-                            ),
-                        maxLines = 3,
-                    )
-                    departure.platform?.let { plat ->
-                        Text(
-                            text = context.getString(R.string.widget_track_short, plat),
-                            style =
-                                TextStyle(
-                                    color = ColorProvider(secondary),
-                                    fontSize = t.caption,
-                                    textAlign = TextAlign.Start,
-                                ),
-                            maxLines = 1,
-                        )
-                    }
-                }
-                Spacer(modifier = GlanceModifier.width(t.gapSmall))
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = minutesText,
-                        style =
-                            TextStyle(
-                                color = ColorProvider(routeColor),
-                                fontSize = t.time,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.End,
-                            ),
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = clockText,
-                        style =
-                            TextStyle(
-                                color = ColorProvider(secondary),
-                                fontSize = t.caption,
-                                textAlign = TextAlign.End,
-                            ),
-                        maxLines = 1,
-                    )
-                }
+                Spacer(modifier = GlanceModifier.height(t.scheduleGapBelowDestination))
+                Text(
+                    text = "$minutesText · $clockLine",
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    style =
+                        TextStyle(
+                            color = ColorProvider(routeColor),
+                            fontSize = t.time,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Start,
+                        ),
+                    maxLines = 3,
+                )
             }
         }
     }

@@ -12,7 +12,17 @@ The in-app UI uses bottom navigation: **Home** and **Settings** (API keys, time 
 
 **Elevator & station alerts**: watch a **route** + **station**; the app pulls **active alerts** for that route and notifies when an alert’s text plausibly matches your station (elevator/escalator/stop-closure effects). This is **heuristic**—not a guarantee every outage is detected.
 
-## App Screenshot
+## Screenshots
+
+**Station board widget** (home screen — scheduled departures, example: Alewife):
+
+<img src="screenshots/widget-station-board-alewife.png" alt="tMinus station board widget showing Alewife scheduled departures" width="350" />
+
+**Trip widget and station board widget** (in-app preview):
+
+<img src="screenshots/widgets-trip-and-station-preview.png" alt="tMinus trip widget and station board widget previews" width="350" />
+
+**App UI** (earlier screenshot):
 
 <img src="screenshots/app-screenshot.jpg" alt="tMinus app screenshot showing trip information and station departures" width="350" />
 

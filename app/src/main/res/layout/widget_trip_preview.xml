@@ -1,72 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Matches MBTATripWidget TripData: full-width route bar, split trip line, caption times. -->
+<!-- Picker preview: narrow layout — countdown beside origin station (matches w &lt; ~318dp). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/widget_preview_widget_surface"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:paddingLeft="10dp"
+    android:paddingTop="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/widget_preview_route_pill"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="6dp">
+        android:paddingLeft="10dp"
+        android:paddingTop="8dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
+            android:maxLines="2"
             android:text="@string/widget_preview_route_name_cr"
             android:textColor="@android:color/white"
-            android:textSize="13sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
+            android:layout_marginStart="6dp"
+            android:maxLines="2"
             android:text="@string/widget_preview_train_headsign"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="10sp"
+            android:alpha="0.9" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/widget_preview_from_to"
+            android:maxLines="2"
+            android:text="@string/widget_preview_from_stop_inline"
             android:textColor="@color/key"
-            android:textSize="14sp" />
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
+            android:layout_marginStart="6dp"
             android:text="@string/widget_preview_in_minutes_sample"
-            android:textColor="@color/key"
-            android:textSize="14sp" />
+            android:textColor="#80276D"
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:gravity="center"
+        android:maxLines="2"
+        android:text="@string/widget_preview_to_stop_arrow"
+        android:textColor="@color/key"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:maxLines="2"
         android:text="@string/widget_preview_times"
         android:textColor="@color/deemphasized"
-        android:textSize="12sp" />
+        android:textSize="11sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:maxLines="2"
+        android:text="@string/widget_preview_tracks_sample"
+        android:textColor="@color/deemphasized"
+        android:textSize="10sp" />
 </LinearLayout>

@@ -8,16 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import com.saarlabs.tminus.SettingsKeys
-
-/**
- * Multiplies any `sp` text size in the app (and widgets) so the user's preferred reading size wins
- * even when specific composables hard-code sizes. 1.0f = default. Range [0.80, 1.60].
- */
-public val LocalAppFontScale: androidx.compose.runtime.ProvidableCompositionLocal<Float> =
-    staticCompositionLocalOf { 1.0f }
 
 /** Reads the persisted font scale from prefs, with live updates when the user changes it. */
 @Composable

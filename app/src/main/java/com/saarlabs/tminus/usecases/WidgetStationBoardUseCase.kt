@@ -18,6 +18,7 @@ public class WidgetStationBoardUseCase(private val client: MbtaV3Client) {
         globalData: GlobalData,
         stopId: String,
         routeFilter: String?,
+        destinationFilter: String?,
         now: EasternTimeInstant,
         limit: Int,
     ): ApiResult<WidgetStationBoardOutput> {
@@ -41,6 +42,7 @@ public class WidgetStationBoardUseCase(private val client: MbtaV3Client) {
                 globalData = globalData,
                 configuredStopId = stopId,
                 routeFilter = routeFilter,
+                destinationFilter = destinationFilter,
                 now = now,
                 limit = limit,
             )
@@ -52,6 +54,7 @@ public class WidgetStationBoardUseCase(private val client: MbtaV3Client) {
         globalData: GlobalData,
         configuredStopId: String,
         routeFilter: String?,
+        destinationFilter: String?,
         now: EasternTimeInstant,
         limit: Int,
     ): List<WidgetStationBoardDeparture> {
@@ -68,6 +71,9 @@ public class WidgetStationBoardUseCase(private val client: MbtaV3Client) {
             if (depTime < now) continue
             val trip = scheduleResponse.trips[schedule.tripId] ?: continue
             if (routeFilter != null && trip.routeId != routeFilter) continue
+            val headsignForFilter =
+                schedule.stopHeadsign?.takeIf { it.isNotBlank() } ?: trip.headsign
+            if (!matchesDestinationFilter(headsignForFilter, destinationFilter)) continue
             candidates.add(Triple(schedule, trip, depTime))
         }
 
@@ -101,5 +107,17 @@ public class WidgetStationBoardUseCase(private val client: MbtaV3Client) {
             )
         }
         return out
+    }
+
+    /** Matches MBTA headsign text to a chosen direction destination (case-insensitive). */
+    private fun matchesDestinationFilter(headsign: String, filter: String?): Boolean {
+        if (filter.isNullOrBlank()) return true
+        val f = filter.trim().lowercase()
+        val h = headsign.trim().lowercase()
+        if (h == f) return true
+        val hPrimary = h.substringBefore(" - ").trim()
+        if (hPrimary == f) return true
+        if (h.startsWith(f)) return true
+        return false
     }
 }

@@ -66,9 +66,7 @@ import com.saarlabs.tminus.model.WidgetStationBoardConfig
 import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.model.response.GlobalData
 import com.saarlabs.tminus.sortStopsWithFavoritesFirst
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -176,13 +174,39 @@ private fun StationBoardWidgetConfigScreen(
     var routes by remember { mutableStateOf<List<Route>?>(null) }
     var routesError by remember { mutableStateOf<String?>(null) }
     var selectedRouteId by remember { mutableStateOf<String?>(null) }
+    var selectedDestination by remember { mutableStateOf<String?>(null) }
+    var previousStopIdForRoutes by remember { mutableStateOf<String?>(null) }
+    var stationBoardConfigHydrated by remember { mutableStateOf(false) }
 
-    LaunchedEffect(selectedStop) {
+    LaunchedEffect(globalResponse, appWidgetId) {
+        val g = globalResponse ?: return@LaunchedEffect
+        if (stationBoardConfigHydrated) return@LaunchedEffect
+        val saved = withContext(Dispatchers.IO) { widgetPreferences.getStationBoardConfigOnce(appWidgetId) }
+        stationBoardConfigHydrated = true
+        if (saved == null || selectedStop != null) return@LaunchedEffect
+        val stop = g.getStop(saved.stopId)?.resolveParent(g.stops) ?: return@LaunchedEffect
+        selectedStop = stop
+        selectedRouteId = saved.routeId
+        selectedDestination = saved.destinationHeadsign
+    }
+
+    LaunchedEffect(selectedStop?.id) {
         val stop = selectedStop
         routes = null
         routesError = null
-        selectedRouteId = null
-        if (stop == null) return@LaunchedEffect
+        if (stop == null) {
+            previousStopIdForRoutes = null
+            selectedRouteId = null
+            selectedDestination = null
+            return@LaunchedEffect
+        }
+        val sid = stop.id
+        val prev = previousStopIdForRoutes
+        if (prev != null && prev != sid) {
+            selectedRouteId = null
+            selectedDestination = null
+        }
+        previousStopIdForRoutes = sid
         when (val r = withContext(Dispatchers.IO) { GlobalDataStore.client.fetchRoutesForStop(stop.id) }) {
             is ApiResult.Ok -> routes = r.data
             is ApiResult.Error -> {
@@ -191,6 +215,17 @@ private fun StationBoardWidgetConfigScreen(
             }
         }
     }
+
+    val destinationChoices =
+        remember(routes, selectedRouteId) {
+            val rid = selectedRouteId ?: return@remember emptyList()
+            routes
+                ?.find { it.id == rid }
+                ?.directionDestinations
+                ?.mapNotNull { d -> d?.trim()?.takeIf { it.isNotEmpty() } }
+                ?.distinct()
+                .orEmpty()
+        }
 
     val selectableStops =
         remember(globalResponse, searchQuery, favoriteIds) {
@@ -253,9 +288,25 @@ private fun StationBoardWidgetConfigScreen(
                             routes = routes,
                             routesError = routesError,
                             selectedRouteId = selectedRouteId,
-                            onSelectAll = { selectedRouteId = null },
-                            onSelectRoute = { selectedRouteId = it },
+                            onSelectAll = {
+                                selectedRouteId = null
+                                selectedDestination = null
+                            },
+                            onSelectRoute = {
+                                selectedRouteId = it
+                                selectedDestination = null
+                            },
                         )
+                    }
+                    if (selectedRouteId != null && destinationChoices.isNotEmpty()) {
+                        item(key = "destinations") {
+                            DestinationFilterSection(
+                                destinations = destinationChoices,
+                                selectedDestination = selectedDestination,
+                                onSelectAllDestinations = { selectedDestination = null },
+                                onSelectDestination = { selectedDestination = it },
+                            )
+                        }
                     }
                     item(key = "save") {
                         Button(
@@ -263,11 +314,15 @@ private fun StationBoardWidgetConfigScreen(
                                 val global = globalResponse ?: return@Button
                                 val stop = selectedStop ?: return@Button
                                 val resolved = stop.resolveParent(global.stops)
+                                val routeId = selectedRouteId
+                                val destination =
+                                    routeId?.let { selectedDestination }
                                 val config =
                                     WidgetStationBoardConfig(
                                         stopId = resolved.id,
                                         stopLabel = resolved.name,
-                                        routeId = selectedRouteId,
+                                        routeId = routeId,
+                                        destinationHeadsign = destination,
                                     )
                                 coroutineScope.launch {
                                     try {
@@ -275,11 +330,11 @@ private fun StationBoardWidgetConfigScreen(
                                             widgetPreferences.setStationBoardConfig(appWidgetId, config)
                                         }
                                         val appContext = context.applicationContext
+                                        // Finish only after Glance has picked up prefs + new compose pass,
+                                        // otherwise "Tap to set up" can stick until the next periodic refresh.
+                                        updateStationBoardWidgetWithRetry(appContext, appWidgetId)
+                                        WidgetUpdateWorker.enqueueRefresh(appContext, intArrayOf(appWidgetId))
                                         onComplete()
-                                        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-                                            updateStationBoardWidgetWithRetry(appContext, appWidgetId)
-                                            WidgetUpdateWorker.enqueueRefresh(appContext, intArrayOf(appWidgetId))
-                                        }
                                     } catch (e: Exception) {
                                         android.util.Log.e("StationBoardWidgetConfig", "save failed", e)
                                         Toast.makeText(
@@ -405,6 +460,38 @@ private fun StationBoardWidgetConfigScreen(
                 }
             }
             Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+        }
+    }
+}
+
+@Composable
+private fun DestinationFilterSection(
+    destinations: List<String>,
+    selectedDestination: String?,
+    onSelectAllDestinations: () -> Unit,
+    onSelectDestination: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Text(
+            text = stringResource(R.string.widget_station_board_destination_section),
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()).padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChip(
+                selected = selectedDestination == null,
+                onClick = onSelectAllDestinations,
+                label = { Text(stringResource(R.string.widget_station_board_destination_all)) },
+            )
+            for (dest in destinations) {
+                FilterChip(
+                    selected = selectedDestination == dest,
+                    onClick = { onSelectDestination(dest) },
+                    label = { Text(dest) },
+                )
+            }
         }
     }
 }

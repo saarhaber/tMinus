@@ -1,135 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Matches MBTAStationBoardWidget Board + DepartureRow: title, subtitle, rows with route chip + headsign + time. -->
+<!--
+  Widget-picker preview (RemoteViews-safe subset). Avoid paddingHorizontal/paddingVertical (API 34+)
+  for inflation on older APIs, and avoid match_parent heights on Views inside wrap_content rows.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/widget_preview_widget_surface"
-    android:orientation="vertical"
-    android:padding="12dp">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_preview_station_board_station"
-        android:textColor="@color/key"
-        android:textSize="15sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/widget_station_board_scheduled_subtitle"
-        android:textColor="@color/deemphasized"
-        android:textSize="11sp" />
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:background="@color/widget_header"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingTop="10dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="10dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/widget_preview_route_chip_red"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="4dp"
-            android:text="@string/widget_preview_sb_row1_route"
-            android:textColor="@android:color/white"
-            android:textSize="11sp"
+            android:maxLines="2"
+            android:text="@string/widget_preview_station_board_station"
+            android:textColor="@color/widget_on_header"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row1_dest"
-                android:textColor="@color/key"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row1_clock"
-                android:textColor="@color/key"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row1_min"
-                android:textColor="@color/deemphasized"
-                android:textSize="11sp" />
-        </LinearLayout>
+            android:layout_marginTop="3dp"
+            android:alpha="0.82"
+            android:maxLines="2"
+            android:text="@string/widget_station_board_scheduled_subtitle"
+            android:textColor="@color/widget_on_header"
+            android:textSize="10sp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/widget_preview_route_chip_green"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="4dp"
-            android:text="@string/widget_preview_sb_row2_route"
-            android:textColor="@android:color/white"
-            android:textSize="11sp"
-            android:textStyle="bold" />
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingTop="8dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginBottom="6dp"
+            android:background="@color/widget_row_bg"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:paddingTop="8dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row2_dest"
-                android:textColor="@color/key"
-                android:textSize="12sp" />
+                android:background="@drawable/widget_preview_route_chip_red"
+                android:maxLines="2"
+                android:paddingLeft="8dp"
+                android:paddingTop="5dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="5dp"
+                android:text="@string/widget_preview_sb_row1_route"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:maxLines="3"
+                android:text="@string/widget_preview_sb_row1_dest"
+                android:textColor="@color/widget_on_surface"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:text="@string/widget_preview_sb_row1_times_line"
+                android:textColor="#DA291C"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="vertical">
+            android:background="@color/widget_row_bg"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:paddingTop="8dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="8dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row2_clock"
-                android:textColor="@color/key"
-                android:textSize="13sp" />
+                android:background="@drawable/widget_preview_route_chip_green"
+                android:maxLines="2"
+                android:paddingLeft="8dp"
+                android:paddingTop="5dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="5dp"
+                android:text="@string/widget_preview_sb_row2_route"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/widget_preview_sb_row2_min"
-                android:textColor="@color/deemphasized"
-                android:textSize="11sp" />
+                android:layout_marginTop="6dp"
+                android:maxLines="3"
+                android:text="@string/widget_preview_sb_row2_dest"
+                android:textColor="@color/widget_on_surface"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:text="@string/widget_preview_sb_row2_times_line"
+                android:textColor="#00843D"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
