@@ -46,6 +46,7 @@ import com.saarlabs.tminus.model.WidgetTripData
 import com.saarlabs.tminus.model.response.ApiResult
 import com.saarlabs.tminus.usecases.WidgetTripUseCase
 import com.saarlabs.tminus.ui.theme.readFontScale
+import com.saarlabs.tminus.ui.widgetTripStopDisplayLabel
 import com.saarlabs.tminus.MainActivity
 import com.saarlabs.tminus.R
 import com.saarlabs.tminus.SettingsKeys
@@ -451,8 +452,10 @@ private object WidgetContent {
         use24Hour: Boolean,
         fontScale: Float,
     ) {
-        val fromLabel = config.fromLabel.ifEmpty { tripData.fromStop.name }
-        val toLabel = config.toLabel.ifEmpty { tripData.toStop.name }
+        val fromLabel =
+            widgetTripStopDisplayLabel(config.fromLabel, tripData.fromStop, context.resources)
+        val toLabel =
+            widgetTripStopDisplayLabel(config.toLabel, tripData.toStop, context.resources)
         val fallback = onSurface(context)
         val routeColor =
             runCatching { colorFromHex(tripData.route.color) }.getOrElse { fallback }
